@@ -104,16 +104,27 @@ a {
 .hero-copy-wrap {
   position: relative;
   z-index: 1;
+  min-width: 0;
   padding-top: clamp(5.5rem, 12vw, 7.5rem);
   padding-bottom: clamp(2rem, 4vw, 3rem);
 }
 
 .hero-copy {
-  max-width: 40rem;
+  container-type: inline-size;
+  max-width: min(40rem, 100%);
+  min-width: 0;
 }
 
 .hero-copy h1 {
-  font-size: clamp(2.3rem, 5.5vw, 4.2rem);
+  /* Scale from the text column so long Russian words stay on one line */
+  font-size: clamp(1.25rem, 6.85cqi, 4.2rem);
+  letter-spacing: -0.02em;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+.hero-copy .brand-mark {
+  overflow-wrap: anywhere;
 }
 
 .hero-video-full {
