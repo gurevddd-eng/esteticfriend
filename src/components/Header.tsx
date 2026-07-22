@@ -6,9 +6,16 @@ import { CallbackModal } from "@/components/CallbackModal";
 import { useCart } from "@/components/CartProvider";
 import { IconBag, IconClose, IconMenu, IconPhone } from "@/components/icons";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
-import { NAV_LINKS, SITE, type CategoryDTO } from "@/lib/content";
+import { NAV_LINKS, type CategoryDTO } from "@/lib/content";
+import type { SiteConfig } from "@/lib/site";
 
-export function Header({ categories }: { categories: CategoryDTO[] }) {
+export function Header({
+  categories,
+  site,
+}: {
+  categories: CategoryDTO[];
+  site: SiteConfig;
+}) {
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [callbackOpen, setCallbackOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,7 +41,7 @@ export function Header({ categories }: { categories: CategoryDTO[] }) {
       <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[color-mix(in_srgb,white_88%,transparent)] backdrop-blur-xl">
         <div className="container-shell flex h-16 items-center justify-between gap-3 md:h-[4.5rem]">
           <Link href="/" className="brand-mark shrink-0 text-[0.95rem] text-navy md:text-base">
-            {SITE.name}
+            {site.name}
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
@@ -82,10 +89,10 @@ export function Header({ categories }: { categories: CategoryDTO[] }) {
 
           <div className="flex items-center gap-2 sm:gap-3">
             <a
-              href={SITE.phoneHref}
+              href={site.phoneHref}
               className="hidden text-sm font-bold text-navy xl:inline"
             >
-              {SITE.phone}
+              {site.phone}
             </a>
             <button
               type="button"
@@ -141,7 +148,7 @@ export function Header({ categories }: { categories: CategoryDTO[] }) {
           aria-label="Меню сайта"
         >
           <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
-            <p className="brand-mark text-sm text-navy">{SITE.name}</p>
+            <p className="brand-mark text-sm text-navy">{site.name}</p>
             <button
               type="button"
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line)] bg-white text-navy"
@@ -197,8 +204,8 @@ export function Header({ categories }: { categories: CategoryDTO[] }) {
             <Link href="/cart" className="btn-outline w-full" onClick={closeMenu}>
               Корзина{count > 0 ? ` (${count})` : ""}
             </Link>
-            <a href={SITE.phoneHref} className="block pt-1 text-center text-sm font-bold text-azure">
-              {SITE.phone}
+            <a href={site.phoneHref} className="block pt-1 text-center text-sm font-bold text-azure">
+              {site.phone}
             </a>
           </div>
         </aside>

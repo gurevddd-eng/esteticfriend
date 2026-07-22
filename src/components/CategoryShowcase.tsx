@@ -1,7 +1,14 @@
 import Link from "next/link";
 import type { CategoryDTO } from "@/lib/content";
+import type { HomepageContent } from "@/lib/site";
 
-export function CategoryShowcase({ categories }: { categories: CategoryDTO[] }) {
+export function CategoryShowcase({
+  categories,
+  content,
+}: {
+  categories: CategoryDTO[];
+  content: HomepageContent["categories"];
+}) {
   const tiles = categories.filter((c) => c.slug !== "novinki").slice(0, 8);
 
   return (
@@ -9,11 +16,11 @@ export function CategoryShowcase({ categories }: { categories: CategoryDTO[] }) 
       <div className="container-shell">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="section-kicker !text-frost/80">Категории аппаратов</p>
-            <h2 className="section-title mt-3 !text-white">Направления каталога</h2>
+            <p className="section-kicker !text-frost/80">{content.kicker}</p>
+            <h2 className="section-title mt-3 !text-white">{content.title}</h2>
           </div>
           <Link href="/catalog" className="btn-ghost w-fit">
-            Весь каталог
+            {content.ctaLabel}
           </Link>
         </div>
 

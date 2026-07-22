@@ -3,7 +3,7 @@ import { Manrope, Unbounded } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import { SiteChrome } from "@/components/SiteChrome";
 import { getCategories } from "@/lib/catalog";
-import { SITE } from "@/lib/content";
+import { getSiteConfig } from "@/lib/site";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -16,27 +16,31 @@ const unbounded = Unbounded({
   subsets: ["latin", "cyrillic"],
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: `${SITE.name} — профессиональное косметическое оборудование`,
-    template: `%s · ${SITE.name}`,
-  },
-  description:
-    "Поставка профессионального косметического оборудования. Офисы в Москве и Санкт-Петербурге, доставка по России и СНГ, обучение и сервис.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteConfig();
+  return {
+    title: {
+      default: `${site.name} — ${site.tagline}`,
+      template: `%s · ${site.name}`,
+    },
+    description: site.about,
+  };
+}
 
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const categories = await getCategories();
+  const [categories, site] = await Promise.all([getCategories(), getSiteConfig()]);
 
   return (
     <html lang="ru" className={`${manrope.variable} ${unbounded.variable} h-full`}>
       <body className="flex min-h-full flex-col antialiased">
         <Providers>
-          <SiteChrome categories={categories}>{children}</SiteChrome>
+          <SiteChrome categories={categories} site={site}>
+            {children}
+          </SiteChrome>
         </Providers>
       </body>
     </html>

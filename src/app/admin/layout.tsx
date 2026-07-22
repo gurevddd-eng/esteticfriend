@@ -4,6 +4,7 @@ import { getAdminSession } from "@/lib/session";
 
 const NAV = [
   { href: "/admin", label: "Обзор" },
+  { href: "/admin/homepage", label: "Главная" },
   { href: "/admin/categories", label: "Категории" },
   { href: "/admin/products", label: "Товары" },
   { href: "/admin/leads", label: "Заявки" },

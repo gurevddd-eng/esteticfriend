@@ -1,13 +1,15 @@
 import Link from "next/link";
-import { PROMOS } from "@/lib/content";
+import type { HomepageContent } from "@/lib/site";
 
-export function PromoBanners() {
+export function PromoBanners({ promos }: { promos: HomepageContent["promos"] }) {
+  if (!promos.length) return null;
+
   return (
     <section className="section-pad !py-10">
       <div className="container-shell grid gap-4 md:grid-cols-2">
-        {PROMOS.map((promo) => (
+        {promos.map((promo) => (
           <article
-            key={promo.title}
+            key={`${promo.title}-${promo.href}`}
             className="rounded-[1.4rem] border border-[var(--line)] bg-white p-6 md:p-7"
           >
             <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
