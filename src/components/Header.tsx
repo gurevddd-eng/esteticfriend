@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { CallbackModal } from "@/components/CallbackModal";
 import { useCart } from "@/components/CartProvider";
 import { IconBag, IconClose, IconMenu, IconPhone } from "@/components/icons";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { NAV_LINKS, SITE, type CategoryDTO } from "@/lib/content";
 
 export function Header({ categories }: { categories: CategoryDTO[] }) {
@@ -13,21 +14,17 @@ export function Header({ categories }: { categories: CategoryDTO[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { count } = useCart();
 
+  useBodyScrollLock(menuOpen);
+
   useEffect(() => {
     if (!menuOpen) return;
-
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setMenuOpen(false);
     };
 
     document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      document.removeEventListener("keydown", onKeyDown);
-    };
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);

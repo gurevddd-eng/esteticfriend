@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { LeadForm } from "@/components/LeadForm";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 export function CallbackModal({
   open,
@@ -9,6 +11,17 @@ export function CallbackModal({
   open: boolean;
   onClose: () => void;
 }) {
+  useBodyScrollLock(open);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (

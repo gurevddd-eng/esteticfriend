@@ -515,6 +515,10 @@ a {
   }
 }
 
+body[data-scroll-locked="true"] {
+  overscroll-behavior: none;
+}
+
 .mobile-drawer {
   position: fixed;
   inset: 0;

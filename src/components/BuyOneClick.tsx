@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LeadForm } from "@/components/LeadForm";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 export function BuyOneClick({
   productId,
@@ -11,6 +12,16 @@ export function BuyOneClick({
   productName: string;
 }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   return (
     <>
@@ -24,6 +35,7 @@ export function BuyOneClick({
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
+            aria-label="Купить в 1 клик"
           >
             <button
               type="button"
