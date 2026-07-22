@@ -125,19 +125,19 @@ async function main() {
       slug: "certificates",
       title: "Сертификаты",
       content:
-        "<p>Работаем с проверенными заводами и поставляем оборудование с необходимой документацией.</p>",
+        "<p>Сотрудничаем с проверенными заводами и поставляем оборудование, в качестве которого уверены. По запросу предоставим сертификаты и сопроводительные документы на интересующие аппараты.</p><ul><li>Сертификат соответствия</li><li>Паспорт оборудования</li><li>Инструкция</li><li>Гарантийный талон</li></ul>",
     },
     {
       slug: "privacy",
       title: "Политика конфиденциальности",
       content:
-        "<p>Мы обрабатываем персональные данные в соответствии с 152-ФЗ для обработки заявок и связи с клиентом.</p>",
+        "<p>Оставляя заявку на сайте ESTETIC FRIEND, вы соглашаетесь на обработку персональных данных (имя, телефон и иные сведения, указанные в форме) с целью обратной связи и подготовки коммерческого предложения.</p><p>Данные не передаются третьим лицам, за исключением случаев, предусмотренных законодательством, и используются только для связи по вашей заявке.</p>",
     },
     {
       slug: "terms",
       title: "Условия использования",
       content:
-        "<p>Используя сайт, вы соглашаетесь с условиями оформления заявок и обработки персональных данных.</p>",
+        "<p>Материалы сайта носят информационный характер и не являются публичной офертой. Актуальные цены, наличие и условия поставки уточняются у менеджера ESTETIC FRIEND.</p><p>Используя сайт, вы соглашаетесь с условиями оформления заявок и обработки персональных данных.</p>",
     },
   ];
 
@@ -150,11 +150,17 @@ async function main() {
   }
 
   const settings: Array<[string, string]> = [
+    ["name", SITE.name],
+    ["tagline", SITE.tagline],
     ["phone", SITE.phone],
     ["email", SITE.email],
     ["cities", SITE.cities],
     ["about", SITE.about],
     ["aboutExtra", SITE.aboutExtra],
+    [
+      "footerText",
+      "Профессиональное косметическое оборудование для салонов и клиник.",
+    ],
   ];
 
   for (const [key, value] of settings) {
@@ -162,6 +168,17 @@ async function main() {
       where: { key },
       update: { value },
       create: { key, value },
+    });
+  }
+
+  // Seed homepage JSON only if missing, so admin edits are preserved on re-seed
+  const existingHome = await prisma.siteSetting.findUnique({
+    where: { key: "homepage" },
+  });
+  if (!existingHome) {
+    const { DEFAULT_HOMEPAGE } = await import("../src/lib/site");
+    await prisma.siteSetting.create({
+      data: { key: "homepage", value: JSON.stringify(DEFAULT_HOMEPAGE) },
     });
   }
 

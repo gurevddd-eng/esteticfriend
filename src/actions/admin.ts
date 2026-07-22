@@ -135,6 +135,7 @@ export async function savePage(slug: string, title: string, content: string) {
   });
   revalidatePath(`/${slug}`);
   revalidatePath("/admin/pages");
+  revalidatePath("/");
   return { ok: true as const };
 }
 
@@ -146,7 +147,23 @@ export async function saveSetting(key: string, value: string) {
     create: { key, value },
   });
   revalidatePath("/");
+  revalidatePath("/contacts");
   revalidatePath("/admin/settings");
+  revalidatePath("/admin/homepage");
+  return { ok: true as const };
+}
+
+export async function saveHomepage(json: string) {
+  await assertAdmin();
+  // Validate JSON before save
+  JSON.parse(json);
+  await prisma.siteSetting.upsert({
+    where: { key: "homepage" },
+    update: { value: json },
+    create: { key: "homepage", value: json },
+  });
+  revalidatePath("/");
+  revalidatePath("/admin/homepage");
   return { ok: true as const };
 }
 

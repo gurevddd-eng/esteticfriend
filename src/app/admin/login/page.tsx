@@ -1,11 +1,9 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { loginAdmin } from "@/actions/auth";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -23,8 +21,8 @@ export default function AdminLoginPage() {
       setError(res.error || "Ошибка входа");
       return;
     }
-    router.push("/admin");
-    router.refresh();
+    // Full navigation so the session cookie is reliably sent to middleware
+    window.location.assign("/admin");
   }
 
   return (
