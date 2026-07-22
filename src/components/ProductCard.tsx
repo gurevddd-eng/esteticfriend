@@ -61,6 +61,7 @@ export function ProductCard({ product }: { product: ProductDTO }) {
             }}
             className="btn-primary !min-h-9 !px-4 !text-sm"
             label="Купить"
+            compact
           />
           <Link href={`/product/${product.slug}`} className="btn-outline !min-h-9 !px-4 !text-sm">
             Подробнее
