@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { SITE } from "@/lib/content";
 import { LeadForm } from "@/components/LeadForm";
+import { getSiteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Контакты",
 };
 
-export default function ContactsPage() {
+export default async function ContactsPage() {
+  const site = await getSiteConfig();
+
   return (
     <div className="section-pad">
       <div className="container-shell grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -19,33 +21,36 @@ export default function ContactsPage() {
           <div className="mt-8 space-y-6">
             <div>
               <p className="text-xs font-bold tracking-wide text-muted uppercase">Телефон</p>
-              <a href={SITE.phoneHref} className="mt-2 block text-2xl font-bold text-navy">
-                {SITE.phone}
+              <a href={site.phoneHref} className="mt-2 block text-2xl font-bold text-navy">
+                {site.phone}
               </a>
             </div>
             <div>
               <p className="text-xs font-bold tracking-wide text-muted uppercase">Email</p>
-              <a href={`mailto:${SITE.email}`} className="mt-2 block text-lg font-semibold text-navy">
-                {SITE.email}
+              <a href={`mailto:${site.email}`} className="mt-2 block text-lg font-semibold text-navy">
+                {site.email}
               </a>
             </div>
             <div>
               <p className="text-xs font-bold tracking-wide text-muted uppercase">Офисы</p>
-              <p className="mt-2 text-lg font-semibold text-navy">{SITE.cities}</p>
+              <p className="mt-2 text-lg font-semibold text-navy">{site.cities}</p>
             </div>
             <div>
               <p className="text-xs font-bold tracking-wide text-muted uppercase">Доставка</p>
               <p className="mt-2 text-muted">Россия, СНГ, Китай</p>
             </div>
+            <div>
+              <p className="text-xs font-bold tracking-wide text-muted uppercase">О компании</p>
+              <p className="mt-2 text-muted leading-relaxed">{site.about}</p>
+              <p className="mt-3 text-muted leading-relaxed">{site.aboutExtra}</p>
+            </div>
           </div>
         </div>
-        <div className="h-fit rounded-[1.4rem] border border-[var(--line)] bg-white p-6 md:p-8">
+        <div className="h-fit rounded-[1.4rem] border border-[var(--line)] bg-white p-6">
           <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
-            Обратный звонок
+            Написать нам
           </h2>
-          <p className="mt-2 mb-5 text-sm text-muted">
-            Оставьте заявку — перезвоним и ответим на вопросы.
-          </p>
+          <p className="mt-2 mb-5 text-sm text-muted">Оставьте контакты — перезвоним.</p>
           <LeadForm source="contacts" compact />
         </div>
       </div>

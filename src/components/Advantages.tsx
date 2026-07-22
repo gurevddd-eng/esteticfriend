@@ -1,15 +1,21 @@
-import { ADVANTAGES } from "@/lib/content";
+import type { HomepageContent } from "@/lib/site";
 
-export function Advantages() {
+export function Advantages({
+  kicker,
+  title,
+  items,
+}: HomepageContent["advantages"]) {
+  if (!items.length) return null;
+
   return (
     <section className="section-pad">
       <div className="container-shell">
-        <p className="section-kicker">Преимущества компании</p>
-        <h2 className="section-title mt-3">Почему выбирают ESTETIC FRIEND</h2>
+        <p className="section-kicker">{kicker}</p>
+        <h2 className="section-title mt-3">{title}</h2>
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {ADVANTAGES.map((item, index) => (
+          {items.map((item, index) => (
             <div
-              key={item.title}
+              key={`${item.title}-${index}`}
               className="rounded-[1.4rem] border border-[var(--line)] bg-white p-6"
             >
               <span className="font-[family-name:var(--font-syne)] text-2xl font-bold text-azure/45">

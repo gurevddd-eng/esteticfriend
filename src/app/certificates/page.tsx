@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CmsContent } from "@/components/CmsContent";
 import { LeadForm } from "@/components/LeadForm";
 
 export const metadata: Metadata = {
@@ -11,27 +12,11 @@ export default function CertificatesPage() {
       <div className="container-shell grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <div>
           <p className="section-kicker">Документы</p>
-          <h1 className="section-title mt-3">Сертификаты</h1>
-          <p className="mt-8 text-muted leading-relaxed">
-            Сотрудничаем с проверенными заводами и поставляем оборудование, в качестве
-            которого уверены. По запросу предоставим сертификаты и сопроводительные
-            документы на интересующие аппараты.
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {[
-              "Сертификат соответствия",
-              "Паспорт оборудования",
-              "Инструкция",
-              "Гарантийный талон",
-            ].map((item) => (
-              <div
-                key={item}
-                className="rounded-[1.2rem] border border-[var(--line)] bg-white px-5 py-6 font-semibold text-navy"
-              >
-                {item}
-              </div>
-            ))}
-          </div>
+          <CmsContent
+            slug="certificates"
+            fallbackTitle="Сертификаты"
+            fallbackHtml="<p>Сотрудничаем с проверенными заводами и поставляем оборудование, в качестве которого уверены. По запросу предоставим сертификаты и сопроводительные документы на интересующие аппараты.</p><ul><li>Сертификат соответствия</li><li>Паспорт оборудования</li><li>Инструкция</li><li>Гарантийный талон</li></ul>"
+          />
         </div>
         <div className="h-fit rounded-[1.4rem] border border-[var(--line)] bg-white p-6">
           <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
