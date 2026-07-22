@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   deleteProduct,
   duplicateProduct,
@@ -11,7 +11,6 @@ import {
 } from "@/actions/admin";
 import {
   AdminBadge,
-  AdminCard,
   AdminEmpty,
   AdminPageHeader,
   confirmDelete,
@@ -39,9 +38,12 @@ export function ProductsAdminClient({
   categories: Array<{ id: string; name: string }>;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [categoryId, setCategoryId] = useState("ALL");
-  const [filter, setFilter] = useState<"ALL" | "ACTIVE" | "INACTIVE" | "HIT" | "NEW" | "OUT">("ALL");
+  const [filter, setFilter] = useState<"ALL" | "ACTIVE" | "INACTIVE" | "HIT" | "NEW" | "OUT">(
+    searchParams.get("hit") === "1" ? "HIT" : "ALL",
+  );
   const [pending, startTransition] = useTransition();
 
   const filtered = useMemo(() => {
@@ -73,23 +75,25 @@ export function ProductsAdminClient({
     <div>
       <AdminPageHeader
         title="Товары"
-        description="Каталог аппаратов: поиск, фильтры, быстрые флаги и дублирование."
+        description="Сетка каталога с быстрыми флагами, поиском и дублированием."
         actions={
-          <Link href="/admin/products/new" className="btn-primary !min-h-10 !text-sm">
+          <Link href="/admin/products/new" className="ea-btn ea-btn--primary">
             + Добавить товар
           </Link>
         }
       />
 
-      <div className="mb-4 grid gap-3 md:grid-cols-[1.2fr_0.8fr_0.8fr]">
+      <div className="ea-toolbar">
         <input
-          className="input-field"
+          className="ea-input"
+          style={{ flex: "1 1 220px" }}
           placeholder="Поиск по названию, slug, категории..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
         <select
-          className="input-field"
+          className="ea-select"
+          style={{ flex: "0 1 180px" }}
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
         >
@@ -100,151 +104,137 @@ export function ProductsAdminClient({
             </option>
           ))}
         </select>
-        <select className="input-field" value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)}>
-          <option value="ALL">Все товары</option>
-          <option value="ACTIVE">Только активные</option>
-          <option value="INACTIVE">Неактивные</option>
-          <option value="HIT">Хиты</option>
-          <option value="NEW">Новинки</option>
-          <option value="OUT">Нет в наличии</option>
-        </select>
+        <div className="ea-seg">
+          {(
+            [
+              ["ALL", "Все"],
+              ["ACTIVE", "Актив"],
+              ["HIT", "Хиты"],
+              ["NEW", "New"],
+              ["OUT", "Нет"],
+              ["INACTIVE", "Скрыт"],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={filter === value ? "is-on" : undefined}
+              onClick={() => setFilter(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <AdminCard>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-black/6 bg-[#faf8f7] text-xs tracking-wide text-[#8a817c] uppercase">
-              <tr>
-                <th className="px-4 py-3 font-bold">Товар</th>
-                <th className="px-4 py-3 font-bold">Категория</th>
-                <th className="px-4 py-3 font-bold">Цена</th>
-                <th className="px-4 py-3 font-bold">Флаги</th>
-                <th className="px-4 py-3 font-bold">Действия</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={5}>
-                    <AdminEmpty title="Товары не найдены" />
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((product) => (
-                  <tr key={product.id} className="border-b border-black/5 align-middle">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-[#f3f1ef]">
-                          {product.imageUrl ? (
-                            <Image
-                              src={product.imageUrl}
-                              alt=""
-                              fill
-                              className="object-contain p-1"
-                              sizes="48px"
-                            />
-                          ) : null}
-                        </div>
-                        <div className="min-w-0">
-                          <Link
-                            href={`/admin/products/${product.id}`}
-                            className="font-semibold text-[#17141a] hover:text-[#b53d4a]"
-                          >
-                            {product.name}
-                          </Link>
-                          <p className="truncate text-xs text-[#8a817c]">/{product.slug}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-[#4a4441]">{product.category.name}</td>
-                    <td className="px-4 py-3 font-semibold text-[#17141a]">
-                      {formatPrice(product.price) || "по запросу"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        <button
-                          type="button"
-                          disabled={pending}
-                          className="rounded-full border border-black/8 px-2 py-0.5 text-[11px] font-bold"
-                          onClick={() =>
-                            refreshAfter(() =>
-                              toggleProductFlag(product.id, "isActive", !product.isActive),
-                            )
-                          }
-                        >
-                          {product.isActive ? "Активен" : "Скрыт"}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={pending}
-                          className="rounded-full border border-black/8 px-2 py-0.5 text-[11px] font-bold"
-                          onClick={() =>
-                            refreshAfter(() =>
-                              toggleProductFlag(product.id, "isHit", !product.isHit),
-                            )
-                          }
-                        >
-                          {product.isHit ? "Хит" : "Не хит"}
-                        </button>
-                        <button
-                          type="button"
-                          disabled={pending}
-                          className="rounded-full border border-black/8 px-2 py-0.5 text-[11px] font-bold"
-                          onClick={() =>
-                            refreshAfter(() =>
-                              toggleProductFlag(product.id, "inStock", !product.inStock),
-                            )
-                          }
-                        >
-                          {product.inStock ? "В наличии" : "Под заказ"}
-                        </button>
-                        {product.isNew ? <AdminBadge tone="accent">New</AdminBadge> : null}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-2">
-                        <Link
-                          href={`/admin/products/${product.id}`}
-                          className="text-sm font-semibold text-[#b53d4a]"
-                        >
-                          Изменить
-                        </Link>
-                        <button
-                          type="button"
-                          disabled={pending}
-                          className="text-sm font-semibold text-[#4a4441]"
-                          onClick={() =>
-                            refreshAfter(async () => {
-                              const res = await duplicateProduct(product.id);
-                              if (res.ok && res.id) router.push(`/admin/products/${res.id}`);
-                            })
-                          }
-                        >
-                          Копия
-                        </button>
-                        <button
-                          type="button"
-                          disabled={pending}
-                          className="text-sm font-semibold text-rose-700"
-                          onClick={() => {
-                            if (!confirmDelete(`Удалить «${product.name}»?`)) return;
-                            refreshAfter(() => deleteProduct(product.id));
-                          }}
-                        >
-                          Удалить
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      {filtered.length === 0 ? (
+        <div className="ea-panel">
+          <AdminEmpty title="Товары не найдены" text="Смените фильтр или добавьте товар" />
         </div>
-        <div className="border-t border-black/6 px-4 py-3 text-xs text-[#8a817c]">
-          Показано {filtered.length} из {products.length}
+      ) : (
+        <div className="ea-product-grid">
+          {filtered.map((product) => (
+            <article key={product.id} className="ea-panel ea-product-card">
+              <div className="ea-product-card__media">
+                {product.imageUrl ? (
+                  <Image src={product.imageUrl} alt="" fill className="object-contain p-3" sizes="240px" />
+                ) : (
+                  <span style={{ color: "var(--ea-faint)", fontSize: "0.8rem" }}>Нет фото</span>
+                )}
+              </div>
+              <div className="ea-product-card__body">
+                <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap", marginBottom: "0.45rem" }}>
+                  {!product.isActive ? <AdminBadge>Скрыт</AdminBadge> : null}
+                  {product.isHit ? <AdminBadge tone="accent">Хит</AdminBadge> : null}
+                  {product.isNew ? <AdminBadge tone="warn">New</AdminBadge> : null}
+                  <AdminBadge tone={product.inStock ? "success" : "neutral"}>
+                    {product.inStock ? "В наличии" : "Под заказ"}
+                  </AdminBadge>
+                </div>
+                <Link
+                  href={`/admin/products/${product.id}`}
+                  style={{ fontWeight: 800, color: "inherit", textDecoration: "none", display: "block" }}
+                >
+                  {product.name}
+                </Link>
+                <p style={{ margin: "0.3rem 0 0", fontSize: "0.8rem", color: "var(--ea-muted)" }}>
+                  {product.category.name} · /{product.slug}
+                </p>
+                <p style={{ margin: "0.55rem 0 0", fontWeight: 800, fontSize: "1.05rem" }}>
+                  {formatPrice(product.price) || "по запросу"}
+                </p>
+
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginTop: "0.75rem" }}>
+                  <button
+                    type="button"
+                    className="ea-btn ea-btn--secondary ea-btn--sm"
+                    disabled={pending}
+                    onClick={() =>
+                      refreshAfter(() => toggleProductFlag(product.id, "isActive", !product.isActive))
+                    }
+                  >
+                    {product.isActive ? "Скрыть" : "Показать"}
+                  </button>
+                  <button
+                    type="button"
+                    className="ea-btn ea-btn--secondary ea-btn--sm"
+                    disabled={pending}
+                    onClick={() =>
+                      refreshAfter(() => toggleProductFlag(product.id, "isHit", !product.isHit))
+                    }
+                  >
+                    {product.isHit ? "Не хит" : "Хит"}
+                  </button>
+                  <button
+                    type="button"
+                    className="ea-btn ea-btn--secondary ea-btn--sm"
+                    disabled={pending}
+                    onClick={() =>
+                      refreshAfter(() => toggleProductFlag(product.id, "inStock", !product.inStock))
+                    }
+                  >
+                    Сток
+                  </button>
+                </div>
+
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.65rem" }}>
+                  <Link href={`/admin/products/${product.id}`} className="ea-btn ea-btn--primary ea-btn--sm">
+                    Изменить
+                  </Link>
+                  <button
+                    type="button"
+                    className="ea-btn ea-btn--ghost ea-btn--sm"
+                    disabled={pending}
+                    onClick={() =>
+                      refreshAfter(async () => {
+                        const res = await duplicateProduct(product.id);
+                        if (res.ok && res.id) router.push(`/admin/products/${res.id}`);
+                      })
+                    }
+                  >
+                    Копия
+                  </button>
+                  <button
+                    type="button"
+                    className="ea-btn ea-btn--danger ea-btn--sm"
+                    disabled={pending}
+                    onClick={() => {
+                      if (!confirmDelete(`Удалить «${product.name}»?`)) return;
+                      refreshAfter(() => deleteProduct(product.id));
+                    }}
+                  >
+                    Удалить
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
-      </AdminCard>
+      )}
+
+      <p style={{ marginTop: "0.85rem", fontSize: "0.8rem", color: "var(--ea-faint)" }}>
+        Показано {filtered.length} из {products.length}
+      </p>
     </div>
   );
 }

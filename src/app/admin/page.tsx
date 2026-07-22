@@ -59,47 +59,55 @@ export default async function AdminDashboardPage() {
     <div>
       <AdminPageHeader
         title="Обзор"
-        description="Сводка по каталогу и входящим заявкам."
+        description="Операционная сводка: заявки, каталог и быстрые переходы."
         actions={
           <>
-            <Link href="/admin/products/new" className="btn-primary !min-h-10 !text-sm">
+            <Link href="/admin/products/new" className="ea-btn ea-btn--primary">
               + Товар
             </Link>
-            <Link href="/admin/leads" className="btn-outline !min-h-10 !text-sm">
-              Заявки
+            <Link href="/admin/leads" className="ea-btn ea-btn--secondary">
+              Канбан заявок
             </Link>
           </>
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="ea-kpi">
         <AdminStat label="Новые заявки" value={leadsNew} href="/admin/leads?status=NEW" hint={`За 24ч: ${leadsToday}`} />
-        <AdminStat label="Заявки за неделю" value={leadsWeek} href="/admin/leads" hint={`Всего: ${leadsTotal}`} />
-        <AdminStat label="Товары" value={products} href="/admin/products" hint={inactiveProducts ? `Неактивных: ${inactiveProducts}` : "Все активны"} />
+        <AdminStat label="За неделю" value={leadsWeek} href="/admin/leads" hint={`Всего: ${leadsTotal}`} />
+        <AdminStat label="Товары" value={products} href="/admin/products" hint={inactiveProducts ? `Скрытых: ${inactiveProducts}` : "Все активны"} />
         <AdminStat label="Категории / отзывы" value={`${categories} / ${reviews}`} href="/admin/categories" />
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      <div className="ea-dash-grid" style={{ marginTop: "1.1rem", display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))" }}>
         <AdminCard>
-          <div className="flex items-center justify-between border-b border-black/6 px-5 py-4">
-            <h2 className="font-semibold text-[#17141a]">Последние заявки</h2>
-            <Link href="/admin/leads" className="text-sm font-semibold text-[#b53d4a]">
+          <div className="ea-panel__head">
+            <h2 className="ea-panel__title">Последние заявки</h2>
+            <Link href="/admin/leads" className="ea-btn ea-btn--ghost ea-btn--sm">
               Все →
             </Link>
           </div>
-          <div className="divide-y divide-black/5">
+          <div>
             {recentLeads.length === 0 ? (
-              <p className="px-5 py-8 text-sm text-[#6f6764]">Заявок пока нет</p>
+              <p className="ea-empty">Заявок пока нет</p>
             ) : (
               recentLeads.map((lead) => (
                 <Link
                   key={lead.id}
                   href={`/admin/leads?id=${lead.id}`}
-                  className="flex items-start justify-between gap-3 px-5 py-3.5 transition hover:bg-[#faf8f7]"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "0.75rem",
+                    padding: "0.85rem 1rem",
+                    borderBottom: "1px solid var(--ea-line)",
+                    textDecoration: "none",
+                    color: "inherit",
+                  }}
                 >
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold text-[#17141a]">{lead.name}</p>
-                    <p className="mt-0.5 text-sm text-[#6f6764]">
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontWeight: 700, margin: 0 }}>{lead.name}</p>
+                    <p style={{ margin: "0.2rem 0 0", fontSize: "0.85rem", color: "var(--ea-muted)" }}>
                       {lead.phone}
                       {lead.product ? ` · ${lead.product.name}` : ""}
                       {lead.source ? ` · ${lead.source}` : ""}
@@ -113,27 +121,37 @@ export default async function AdminDashboardPage() {
         </AdminCard>
 
         <AdminCard>
-          <div className="flex items-center justify-between border-b border-black/6 px-5 py-4">
-            <h2 className="font-semibold text-[#17141a]">Хиты продаж</h2>
-            <Link href="/admin/products?hit=1" className="text-sm font-semibold text-[#b53d4a]">
+          <div className="ea-panel__head">
+            <h2 className="ea-panel__title">Хиты продаж</h2>
+            <Link href="/admin/products?hit=1" className="ea-btn ea-btn--ghost ea-btn--sm">
               Каталог →
             </Link>
           </div>
-          <div className="divide-y divide-black/5">
+          <div>
             {hitProducts.length === 0 ? (
-              <p className="px-5 py-8 text-sm text-[#6f6764]">Отметьте товары как «Хит»</p>
+              <p className="ea-empty">Отметьте товары как «Хит»</p>
             ) : (
               hitProducts.map((product) => (
                 <Link
                   key={product.id}
                   href={`/admin/products/${product.id}`}
-                  className="flex items-center justify-between gap-3 px-5 py-3.5 transition hover:bg-[#faf8f7]"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "0.75rem",
+                    padding: "0.85rem 1rem",
+                    borderBottom: "1px solid var(--ea-line)",
+                    textDecoration: "none",
+                    color: "inherit",
+                  }}
                 >
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold text-[#17141a]">{product.name}</p>
-                    <p className="mt-0.5 text-sm text-[#6f6764]">{product.category.name}</p>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontWeight: 700, margin: 0 }}>{product.name}</p>
+                    <p style={{ margin: "0.2rem 0 0", fontSize: "0.85rem", color: "var(--ea-muted)" }}>
+                      {product.category.name}
+                    </p>
                   </div>
-                  <p className="shrink-0 text-sm font-bold text-[#17141a]">
+                  <p style={{ fontWeight: 800, margin: 0, whiteSpace: "nowrap" }}>
                     {formatPrice(product.price ? Number(product.price) : null) || "—"}
                   </p>
                 </Link>
@@ -143,17 +161,28 @@ export default async function AdminDashboardPage() {
         </AdminCard>
       </div>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        style={{
+          marginTop: "1rem",
+          display: "grid",
+          gap: "0.75rem",
+          gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))",
+        }}
+      >
         {[
-          { href: "/admin/homepage", title: "Главная", text: "Hero, баннеры, блоки" },
+          { href: "/admin/homepage", title: "Главная", text: "Hero + live preview" },
           { href: "/admin/pages", title: "Страницы", text: "Политики и сервисы" },
-          { href: "/admin/reviews", title: "Отзывы", text: "Модерация отзывов" },
+          { href: "/admin/reviews", title: "Отзывы", text: "Модерация" },
           { href: "/admin/settings", title: "Настройки", text: "Контакты и пароль" },
         ].map((item) => (
-          <Link key={item.href} href={item.href}>
-            <AdminCard className="p-4 transition hover:-translate-y-0.5">
-              <p className="font-semibold text-[#17141a]">{item.title}</p>
-              <p className="mt-1 text-sm text-[#6f6764]">{item.text}</p>
+          <Link key={item.href} href={item.href} style={{ textDecoration: "none", color: "inherit" }}>
+            <AdminCard className="ea-quick">
+              <div style={{ padding: "1rem" }}>
+                <p style={{ fontWeight: 800, margin: 0 }}>{item.title}</p>
+                <p style={{ margin: "0.35rem 0 0", fontSize: "0.85rem", color: "var(--ea-muted)" }}>
+                  {item.text}
+                </p>
+              </div>
             </AdminCard>
           </Link>
         ))}

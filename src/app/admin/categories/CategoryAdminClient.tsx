@@ -53,30 +53,30 @@ export function CategoryAdminClient({ categories }: { categories: CategoryRow[] 
         title="Категории"
         description="Разделы каталога. Удаление возможно только без товаров внутри."
       />
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <AdminCard className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead className="border-b border-black/6 bg-[#faf8f7] text-xs tracking-wide text-[#8a817c] uppercase">
+      <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))" }}>
+        <AdminCard className="ea-table-wrap">
+          <table className="ea-table">
+            <thead>
               <tr>
-                <th className="px-4 py-3 font-bold">Название</th>
-                <th className="px-4 py-3 font-bold">Slug</th>
-                <th className="px-4 py-3 font-bold">Порядок</th>
-                <th className="px-4 py-3 font-bold">Товары</th>
-                <th className="px-4 py-3 font-bold" />
+                <th>Название</th>
+                <th>Slug</th>
+                <th>Порядок</th>
+                <th>Товары</th>
+                <th />
               </tr>
             </thead>
             <tbody>
               {categories.map((c) => (
-                <tr key={c.id} className="border-b border-black/5 last:border-0">
-                  <td className="px-4 py-3 font-semibold text-[#17141a]">{c.name}</td>
-                  <td className="px-4 py-3 text-[#6f6764]">/{c.slug}</td>
-                  <td className="px-4 py-3">{c.sortOrder}</td>
-                  <td className="px-4 py-3">{c._count.products}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-3">
+                <tr key={c.id}>
+                  <td style={{ fontWeight: 700 }}>{c.name}</td>
+                  <td>/{c.slug}</td>
+                  <td>{c.sortOrder}</td>
+                  <td>{c._count.products}</td>
+                  <td>
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
                       <button
                         type="button"
-                        className="text-sm font-semibold text-[#b53d4a]"
+                        className="ea-btn ea-btn--ghost ea-btn--sm"
                         onClick={() => {
                           setEditing(c);
                           setMessage(null);
@@ -86,7 +86,7 @@ export function CategoryAdminClient({ categories }: { categories: CategoryRow[] 
                       </button>
                       <button
                         type="button"
-                        className="text-sm font-semibold text-rose-700"
+                        className="ea-btn ea-btn--danger ea-btn--sm"
                         onClick={async () => {
                           if (!confirmDelete(`Удалить категорию «${c.name}»?`)) return;
                           const res = await deleteCategory(c.id);
@@ -107,44 +107,33 @@ export function CategoryAdminClient({ categories }: { categories: CategoryRow[] 
           </table>
         </AdminCard>
 
-        <AdminCard className="h-fit p-5">
-          <form key={editing?.id || "new"} onSubmit={onSubmit} className="space-y-4">
-            <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-[#17141a]">
-              {editing ? "Редактировать" : "Новая категория"}
-            </h2>
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-bold text-[#8a817c] uppercase">Название</span>
-              <input name="name" required className="input-field" defaultValue={editing?.name || ""} />
+        <AdminCard>
+          <form key={editing?.id || "new"} onSubmit={onSubmit} style={{ padding: "1.15rem", display: "grid", gap: "0.85rem" }}>
+            <h2 className="ea-panel__title">{editing ? "Редактировать" : "Новая категория"}</h2>
+            <label>
+              <span className="ea-label">Название</span>
+              <input name="name" required className="ea-input" defaultValue={editing?.name || ""} />
             </label>
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-bold text-[#8a817c] uppercase">Slug</span>
-              <input name="slug" className="input-field" defaultValue={editing?.slug || ""} />
+            <label>
+              <span className="ea-label">Slug</span>
+              <input name="slug" className="ea-input" defaultValue={editing?.slug || ""} />
             </label>
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-bold text-[#8a817c] uppercase">Описание</span>
-              <textarea
-                name="description"
-                className="input-field min-h-24"
-                defaultValue={editing?.description || ""}
-              />
+            <label>
+              <span className="ea-label">Описание</span>
+              <textarea name="description" className="ea-textarea" defaultValue={editing?.description || ""} />
             </label>
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-bold text-[#8a817c] uppercase">Порядок</span>
-              <input
-                name="sortOrder"
-                type="number"
-                className="input-field"
-                defaultValue={editing?.sortOrder ?? 0}
-              />
+            <label>
+              <span className="ea-label">Порядок</span>
+              <input name="sortOrder" type="number" className="ea-input" defaultValue={editing?.sortOrder ?? 0} />
             </label>
-            {error ? <p className="text-sm text-rose-700">{error}</p> : null}
-            {message ? <p className="text-sm text-[#b53d4a]">{message}</p> : null}
-            <div className="flex gap-2">
-              <button type="submit" className="btn-primary">
+            {error ? <p style={{ margin: 0, color: "var(--ea-danger)", fontWeight: 700 }}>{error}</p> : null}
+            {message ? <p style={{ margin: 0, color: "var(--ea-ok)", fontWeight: 700 }}>{message}</p> : null}
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <button type="submit" className="ea-btn ea-btn--primary">
                 Сохранить
               </button>
               {editing ? (
-                <button type="button" className="btn-outline" onClick={() => setEditing(null)}>
+                <button type="button" className="ea-btn ea-btn--secondary" onClick={() => setEditing(null)}>
                   Отмена
                 </button>
               ) : null}

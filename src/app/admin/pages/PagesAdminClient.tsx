@@ -67,7 +67,6 @@ export function PagesAdminClient({ pages }: { pages: PageRow[] }) {
 
   function startCreate(preset?: { slug: string; title: string }) {
     setCreating(true);
-    setCurrentId("");
     setMessage(null);
     setError(null);
     setItems((prev) => {
@@ -90,20 +89,20 @@ export function PagesAdminClient({ pages }: { pages: PageRow[] }) {
         title="Страницы"
         description="Тексты политик, сервисов и других CMS-страниц. HTML поддерживается."
         actions={
-          <button type="button" className="btn-primary !min-h-10 !text-sm" onClick={() => startCreate()}>
+          <button type="button" className="ea-btn ea-btn--primary" onClick={() => startCreate()}>
             + Новая страница
           </button>
         }
       />
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="ea-toolbar">
         {PRESETS.map((preset) => {
           const exists = pages.some((p) => p.slug === preset.slug);
           return (
             <button
               key={preset.slug}
               type="button"
-              className="rounded-full border border-black/8 bg-white px-3 py-1.5 text-xs font-semibold text-[#4a4441]"
+              className="ea-btn ea-btn--secondary ea-btn--sm"
               onClick={() => {
                 if (exists) {
                   const page = items.find((p) => p.slug === preset.slug);
@@ -121,81 +120,75 @@ export function PagesAdminClient({ pages }: { pages: PageRow[] }) {
         })}
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
-        <AdminCard className="max-h-[70vh] overflow-y-auto p-2">
-          {items.length === 0 ? (
-            <AdminEmpty title="Страниц нет" />
-          ) : (
-            items.map((page) => (
-              <button
-                key={page.id}
-                type="button"
-                onClick={() => {
-                  setCreating(page.id === "__new__");
-                  setCurrentId(page.id);
-                  setMessage(null);
-                  setError(null);
-                }}
-                className={`mb-1 w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition ${
-                  currentId === page.id
-                    ? "bg-[#17141a] text-white"
-                    : "text-[#17141a] hover:bg-[#f3f1ef]"
-                }`}
-              >
-                <span className="block truncate">{page.title}</span>
-                <span className={`mt-0.5 block text-xs ${currentId === page.id ? "text-white/60" : "text-[#8a817c]"}`}>
-                  /{page.slug || "..."}
-                </span>
-              </button>
-            ))
-          )}
+      <div className="ea-pages-layout">
+        <AdminCard>
+          <div style={{ maxHeight: "70vh", overflow: "auto", padding: "0.45rem" }}>
+            {items.length === 0 ? (
+              <AdminEmpty title="Страниц нет" />
+            ) : (
+              items.map((page) => (
+                <button
+                  key={page.id}
+                  type="button"
+                  onClick={() => {
+                    setCreating(page.id === "__new__");
+                    setCurrentId(page.id);
+                    setMessage(null);
+                    setError(null);
+                  }}
+                  className={`ea-btn ${currentId === page.id ? "ea-btn--primary" : "ea-btn--ghost"}`}
+                  style={{ width: "100%", justifyContent: "flex-start", marginBottom: "0.25rem", flexDirection: "column", alignItems: "flex-start", height: "auto", minHeight: "auto", padding: "0.65rem 0.75rem" }}
+                >
+                  <span style={{ display: "block", fontWeight: 800 }}>{page.title}</span>
+                  <span style={{ display: "block", fontSize: "0.75rem", opacity: 0.7 }}>
+                    /{page.slug || "..."}
+                  </span>
+                </button>
+              ))
+            )}
+          </div>
         </AdminCard>
 
         {current ? (
-          <AdminCard className="p-5">
-            <form key={current.id} onSubmit={onSubmit} className="space-y-4">
-              <label className="block">
-                <span className="mb-1.5 block text-xs font-bold tracking-wide text-[#8a817c] uppercase">
-                  Заголовок
-                </span>
-                <input name="title" required className="input-field" defaultValue={current.title} />
+          <AdminCard>
+            <form key={current.id} onSubmit={onSubmit} style={{ padding: "1.15rem", display: "grid", gap: "0.85rem" }}>
+              <label>
+                <span className="ea-label">Заголовок</span>
+                <input name="title" required className="ea-input" defaultValue={current.title} />
               </label>
-              <label className="block">
-                <span className="mb-1.5 block text-xs font-bold tracking-wide text-[#8a817c] uppercase">
-                  Slug (URL)
-                </span>
+              <label>
+                <span className="ea-label">Slug (URL)</span>
                 <input
                   name="slug"
                   required
-                  className="input-field"
+                  className="ea-input"
                   defaultValue={current.slug}
                   disabled={!creating && Boolean(current.slug)}
                 />
               </label>
-              <label className="block">
-                <span className="mb-1.5 block text-xs font-bold tracking-wide text-[#8a817c] uppercase">
-                  Контент (HTML)
-                </span>
+              <label>
+                <span className="ea-label">Контент (HTML)</span>
                 <textarea
                   name="content"
-                  className="input-field min-h-72 font-mono text-sm"
+                  className="ea-textarea"
+                  style={{ minHeight: "18rem", fontFamily: "ui-monospace, monospace", fontSize: "0.85rem" }}
                   defaultValue={current.content}
                 />
               </label>
-              <label className="flex items-center gap-2 text-sm font-semibold text-[#17141a]">
+              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 700 }}>
                 <input name="isPublished" type="checkbox" defaultChecked={current.isPublished} />
                 Опубликована
               </label>
-              {message ? <p className="text-sm text-[#b53d4a]">{message}</p> : null}
-              {error ? <p className="text-sm text-rose-700">{error}</p> : null}
-              <div className="flex flex-wrap gap-2">
-                <button type="submit" className="btn-primary" disabled={pending}>
+              {message ? <p style={{ margin: 0, color: "var(--ea-ok)", fontWeight: 700 }}>{message}</p> : null}
+              {error ? <p style={{ margin: 0, color: "var(--ea-danger)", fontWeight: 700 }}>{error}</p> : null}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                <button type="submit" className="ea-btn ea-btn--primary" disabled={pending}>
                   {pending ? "Сохраняем..." : "Сохранить"}
                 </button>
                 {!creating && current.id !== "__new__" ? (
                   <button
                     type="button"
-                    className="btn-outline !text-rose-700"
+                    className="ea-btn ea-btn--danger"
                     disabled={pending}
                     onClick={() => {
                       if (!confirmDelete(`Удалить страницу «${current.title}»?`)) return;
@@ -210,7 +203,7 @@ export function PagesAdminClient({ pages }: { pages: PageRow[] }) {
                   </button>
                 ) : null}
                 {current.slug ? (
-                  <a href={`/${current.slug}`} target="_blank" className="btn-outline">
+                  <a href={`/${current.slug}`} target="_blank" className="ea-btn ea-btn--secondary">
                     Открыть ↗
                   </a>
                 ) : null}

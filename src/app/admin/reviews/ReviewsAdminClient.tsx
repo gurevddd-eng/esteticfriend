@@ -49,65 +49,65 @@ export function ReviewsAdminClient({ reviews }: { reviews: ReviewRow[] }) {
         title="Отзывы"
         description="Отзывы на главной. Скрытые не показываются посетителям."
       />
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="space-y-3">
+      <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))" }}>
+        <div style={{ display: "grid", gap: "0.75rem" }}>
           {reviews.map((r) => (
-            <AdminCard key={r.id} className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-bold text-[#17141a]">{r.title}</h2>
-                    {!r.isActive ? <AdminBadge>Скрыт</AdminBadge> : null}
+            <AdminCard key={r.id}>
+              <div style={{ padding: "1rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem" }}>
+                  <div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", alignItems: "center" }}>
+                      <h2 style={{ margin: 0, fontSize: "1rem", fontWeight: 800 }}>{r.title}</h2>
+                      {!r.isActive ? <AdminBadge>Скрыт</AdminBadge> : null}
+                    </div>
+                    <p style={{ margin: "0.35rem 0 0", fontSize: "0.85rem", color: "var(--ea-muted)" }}>
+                      {r.author}
+                      {r.age ? `, ${r.age}` : ""} · порядок {r.sortOrder}
+                    </p>
                   </div>
-                  <p className="text-sm text-[#6f6764]">
-                    {r.author}
-                    {r.age ? `, ${r.age}` : ""} · порядок {r.sortOrder}
-                  </p>
+                  <div style={{ display: "flex", gap: "0.35rem" }}>
+                    <button type="button" className="ea-btn ea-btn--ghost ea-btn--sm" onClick={() => setEditing(r)}>
+                      Изменить
+                    </button>
+                    <button
+                      type="button"
+                      className="ea-btn ea-btn--danger ea-btn--sm"
+                      onClick={async () => {
+                        if (!confirmDelete("Удалить отзыв?")) return;
+                        await deleteReview(r.id);
+                        router.refresh();
+                      }}
+                    >
+                      Удалить
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    className="text-sm font-semibold text-[#b53d4a]"
-                    onClick={() => setEditing(r)}
-                  >
-                    Изменить
-                  </button>
-                  <button
-                    type="button"
-                    className="text-sm font-semibold text-rose-700"
-                    onClick={async () => {
-                      if (!confirmDelete("Удалить отзыв?")) return;
-                      await deleteReview(r.id);
-                      router.refresh();
-                    }}
-                  >
-                    Удалить
-                  </button>
-                </div>
+                <p style={{ margin: "0.65rem 0 0", fontSize: "0.9rem", color: "var(--ea-muted)" }}>{r.text}</p>
               </div>
-              <p className="mt-2 text-sm text-[#4a4441]">{r.text}</p>
             </AdminCard>
           ))}
         </div>
 
-        <AdminCard className="h-fit p-5">
-          <form key={editing?.id || "new"} onSubmit={onSubmit} className="space-y-4">
-            <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-[#17141a]">
-              {editing ? "Редактировать" : "Новый отзыв"}
-            </h2>
-            <input name="author" required className="input-field" placeholder="Автор" defaultValue={editing?.author || ""} />
-            <input name="age" type="number" className="input-field" placeholder="Возраст" defaultValue={editing?.age ?? ""} />
-            <input name="title" required className="input-field" placeholder="Заголовок" defaultValue={editing?.title || ""} />
-            <textarea name="text" required className="input-field min-h-28" placeholder="Текст" defaultValue={editing?.text || ""} />
-            <input name="sortOrder" type="number" className="input-field" placeholder="Порядок" defaultValue={editing?.sortOrder ?? 0} />
-            <label className="flex items-center gap-2 text-sm font-semibold">
+        <AdminCard>
+          <form key={editing?.id || "new"} onSubmit={onSubmit} style={{ padding: "1.15rem", display: "grid", gap: "0.85rem" }}>
+            <h2 className="ea-panel__title">{editing ? "Редактировать" : "Новый отзыв"}</h2>
+            <input name="author" required className="ea-input" placeholder="Автор" defaultValue={editing?.author || ""} />
+            <input name="age" type="number" className="ea-input" placeholder="Возраст" defaultValue={editing?.age ?? ""} />
+            <input name="title" required className="ea-input" placeholder="Заголовок" defaultValue={editing?.title || ""} />
+            <textarea name="text" required className="ea-textarea" placeholder="Текст" defaultValue={editing?.text || ""} />
+            <input name="sortOrder" type="number" className="ea-input" placeholder="Порядок" defaultValue={editing?.sortOrder ?? 0} />
+            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 700 }}>
               <input name="isActive" type="checkbox" defaultChecked={editing?.isActive ?? true} />
               Показывать на сайте
             </label>
-            <div className="flex gap-2">
-              <button type="submit" className="btn-primary">Сохранить</button>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <button type="submit" className="ea-btn ea-btn--primary">
+                Сохранить
+              </button>
               {editing ? (
-                <button type="button" className="btn-outline" onClick={() => setEditing(null)}>Отмена</button>
+                <button type="button" className="ea-btn ea-btn--secondary" onClick={() => setEditing(null)}>
+                  Отмена
+                </button>
               ) : null}
             </div>
           </form>

@@ -1,7 +1,8 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { ProductsAdminClient } from "./ProductsAdminClient";
 
-export default async function AdminProductsPage() {
+async function ProductsInner() {
   const [products, categories] = await Promise.all([
     prisma.product.findMany({
       orderBy: [{ updatedAt: "desc" }],
@@ -26,5 +27,13 @@ export default async function AdminProductsPage() {
       }))}
       categories={categories.map((c) => ({ id: c.id, name: c.name }))}
     />
+  );
+}
+
+export default function AdminProductsPage() {
+  return (
+    <Suspense fallback={<p className="ea-sub">Загрузка каталога...</p>}>
+      <ProductsInner />
+    </Suspense>
   );
 }

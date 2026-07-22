@@ -54,54 +54,46 @@ export function SettingsAdminClient({
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div style={{ maxWidth: "720px", display: "grid", gap: "1rem" }}>
       <AdminPageHeader
         title="Настройки"
         description="Контакты сайта, тексты и безопасность входа."
       />
 
-      <AdminCard className="p-6">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-[#17141a]">
-            Сайт и контакты
-          </h2>
+      <AdminCard>
+        <form onSubmit={onSubmit} style={{ padding: "1.15rem", display: "grid", gap: "0.85rem" }}>
+          <h2 className="ea-panel__title">Сайт и контакты</h2>
           {FIELDS.map(([key, label]) => (
-            <label key={key} className="block">
-              <span className="mb-1.5 block text-xs font-bold text-[#8a817c] uppercase">{label}</span>
+            <label key={key}>
+              <span className="ea-label">{label}</span>
               {key === "about" || key === "aboutExtra" || key === "footerText" ? (
-                <textarea name={key} className="input-field min-h-28" defaultValue={settings[key] || ""} />
+                <textarea name={key} className="ea-textarea" defaultValue={settings[key] || ""} />
               ) : (
-                <input name={key} className="input-field" defaultValue={settings[key] || ""} />
+                <input name={key} className="ea-input" defaultValue={settings[key] || ""} />
               )}
             </label>
           ))}
-          {message ? <p className="text-sm text-[#b53d4a]">{message}</p> : null}
-          <button type="submit" className="btn-primary">
+          {message ? <p style={{ margin: 0, color: "var(--ea-ok)", fontWeight: 700 }}>{message}</p> : null}
+          <button type="submit" className="ea-btn ea-btn--primary">
             Сохранить настройки
           </button>
         </form>
       </AdminCard>
 
-      <AdminCard className="p-6">
-        <form onSubmit={onPassword} className="space-y-4">
-          <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-[#17141a]">
-            Смена пароля
-          </h2>
-          <label className="block">
-            <span className="mb-1.5 block text-xs font-bold text-[#8a817c] uppercase">
-              Текущий пароль
-            </span>
-            <input name="currentPassword" type="password" required className="input-field" />
+      <AdminCard>
+        <form onSubmit={onPassword} style={{ padding: "1.15rem", display: "grid", gap: "0.85rem" }}>
+          <h2 className="ea-panel__title">Смена пароля</h2>
+          <label>
+            <span className="ea-label">Текущий пароль</span>
+            <input name="currentPassword" type="password" required className="ea-input" />
           </label>
-          <label className="block">
-            <span className="mb-1.5 block text-xs font-bold text-[#8a817c] uppercase">
-              Новый пароль
-            </span>
-            <input name="newPassword" type="password" required minLength={8} className="input-field" />
+          <label>
+            <span className="ea-label">Новый пароль</span>
+            <input name="newPassword" type="password" required minLength={8} className="ea-input" />
           </label>
-          {pwdError ? <p className="text-sm text-rose-700">{pwdError}</p> : null}
-          {pwdMessage ? <p className="text-sm text-[#b53d4a]">{pwdMessage}</p> : null}
-          <button type="submit" className="btn-outline">
+          {pwdError ? <p style={{ margin: 0, color: "var(--ea-danger)", fontWeight: 700 }}>{pwdError}</p> : null}
+          {pwdMessage ? <p style={{ margin: 0, color: "var(--ea-ok)", fontWeight: 700 }}>{pwdMessage}</p> : null}
+          <button type="submit" className="ea-btn ea-btn--secondary">
             Обновить пароль
           </button>
         </form>

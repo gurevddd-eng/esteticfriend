@@ -21,7 +21,7 @@ async function LeadsInner() {
 
 export default function AdminLeadsPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-[#6f6764]">Загрузка заявок...</p>}>
+    <Suspense fallback={<p className="ea-sub">Загрузка заявок...</p>}>
       <LeadsInner />
     </Suspense>
   );

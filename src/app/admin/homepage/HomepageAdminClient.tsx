@@ -12,6 +12,7 @@ export function HomepageAdminClient({ initial }: { initial: HomepageContent }) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [previewKey, setPreviewKey] = useState(0);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -21,6 +22,7 @@ export function HomepageAdminClient({ initial }: { initial: HomepageContent }) {
     try {
       await saveHomepage(JSON.stringify(home));
       setMessage("Главная страница сохранена");
+      setPreviewKey((k) => k + 1);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ошибка сохранения");
@@ -104,314 +106,312 @@ export function HomepageAdminClient({ initial }: { initial: HomepageContent }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-8">
+    <form onSubmit={onSubmit}>
       <AdminPageHeader
         title="Главная страница"
-        description="Редактируйте тексты и блоки главной. Хиты, категории и отзывы берутся из соответствующих разделов."
+        description="Редактор слева, живой превью сайта справа. Сохраните, чтобы обновить превью."
         actions={
-          <button type="submit" className="btn-primary" disabled={pending}>
-            {pending ? "Сохраняем..." : "Сохранить"}
-          </button>
+          <>
+            <a href="/" target="_blank" className="ea-btn ea-btn--secondary">
+              Открыть сайт
+            </a>
+            <button type="submit" className="ea-btn ea-btn--primary" disabled={pending}>
+              {pending ? "Сохраняем..." : "Сохранить"}
+            </button>
+          </>
         }
       />
-      {message ? <p className="text-sm text-[#b53d4a]">{message}</p> : null}
-      {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+      {message ? <p style={{ color: "var(--ea-ok)", fontWeight: 700 }}>{message}</p> : null}
+      {error ? <p style={{ color: "var(--ea-danger)", fontWeight: 700 }}>{error}</p> : null}
 
-      <section className="space-y-4 rounded-[1.2rem] border border-[var(--line)] bg-white p-5">
-        <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">Hero</h2>
-        {(
-          [
-            ["brand", "Бренд"],
-            ["title", "Заголовок"],
-            ["text", "Текст"],
-            ["primaryCtaLabel", "Кнопка 1 — текст"],
-            ["primaryCtaHref", "Кнопка 1 — ссылка"],
-            ["secondaryCtaLabel", "Кнопка 2 — текст"],
-            ["secondaryCtaHref", "Кнопка 2 — ссылка"],
-            ["videoSrc", "Видео (путь)"],
-          ] as const
-        ).map(([key, label]) => (
-          <label key={key} className="block">
-            <span className="mb-1.5 block text-xs font-bold text-muted uppercase">{label}</span>
-            {key === "text" ? (
-              <textarea
-                className="input-field min-h-24"
-                value={home.hero[key]}
-                onChange={(e) =>
-                  setHome((prev) => ({ ...prev, hero: { ...prev.hero, [key]: e.target.value } }))
-                }
-              />
-            ) : (
-              <input
-                className="input-field"
-                value={home.hero[key]}
-                onChange={(e) =>
-                  setHome((prev) => ({ ...prev, hero: { ...prev.hero, [key]: e.target.value } }))
-                }
-              />
-            )}
-          </label>
-        ))}
-      </section>
+      <div className="ea-split">
+        <div style={{ display: "grid", gap: "0.9rem" }}>
+          <section className="ea-panel" style={{ padding: "1rem" }}>
+            <h2 className="ea-panel__title">Hero</h2>
+            <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.85rem" }}>
+              {(
+                [
+                  ["brand", "Бренд"],
+                  ["title", "Заголовок"],
+                  ["text", "Текст"],
+                  ["primaryCtaLabel", "Кнопка 1 — текст"],
+                  ["primaryCtaHref", "Кнопка 1 — ссылка"],
+                  ["secondaryCtaLabel", "Кнопка 2 — текст"],
+                  ["secondaryCtaHref", "Кнопка 2 — ссылка"],
+                  ["videoSrc", "Видео (путь)"],
+                ] as const
+              ).map(([key, label]) => (
+                <label key={key}>
+                  <span className="ea-label">{label}</span>
+                  {key === "text" ? (
+                    <textarea
+                      className="ea-textarea"
+                      value={home.hero[key]}
+                      onChange={(e) =>
+                        setHome((prev) => ({ ...prev, hero: { ...prev.hero, [key]: e.target.value } }))
+                      }
+                    />
+                  ) : (
+                    <input
+                      className="ea-input"
+                      value={home.hero[key]}
+                      onChange={(e) =>
+                        setHome((prev) => ({ ...prev, hero: { ...prev.hero, [key]: e.target.value } }))
+                      }
+                    />
+                  )}
+                </label>
+              ))}
+            </div>
+          </section>
 
-      <section className="space-y-4 rounded-[1.2rem] border border-[var(--line)] bg-white p-5">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
-            Промо-баннеры
-          </h2>
-          <button type="button" className="btn-outline !min-h-9 !text-sm" onClick={() => addListItem("promos")}>
-            Добавить
-          </button>
-        </div>
-        {home.promos.map((promo, index) => (
-          <div key={index} className="space-y-3 rounded-xl border border-[var(--line)] p-4">
-            <div className="flex justify-between">
-              <p className="text-xs font-bold text-muted uppercase">Баннер {index + 1}</p>
-              <button
-                type="button"
-                className="text-sm font-semibold text-azure"
-                onClick={() => removeListItem("promos", index)}
-              >
-                Удалить
+          <section className="ea-panel" style={{ padding: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center" }}>
+              <h2 className="ea-panel__title">Промо-баннеры</h2>
+              <button type="button" className="ea-btn ea-btn--secondary ea-btn--sm" onClick={() => addListItem("promos")}>
+                Добавить
               </button>
             </div>
-            {(
-              [
-                ["title", "Заголовок"],
-                ["text", "Текст"],
-                ["cta", "Кнопка"],
-                ["href", "Ссылка"],
-              ] as const
-            ).map(([key, label]) => (
-              <label key={key} className="block">
-                <span className="mb-1.5 block text-xs font-bold text-muted uppercase">{label}</span>
-                {key === "text" ? (
-                  <textarea
-                    className="input-field min-h-20"
-                    value={promo[key]}
-                    onChange={(e) => updatePromo(index, { [key]: e.target.value })}
-                  />
-                ) : (
-                  <input
-                    className="input-field"
-                    value={promo[key]}
-                    onChange={(e) => updatePromo(index, { [key]: e.target.value })}
-                  />
-                )}
-              </label>
-            ))}
-          </div>
-        ))}
-      </section>
+            <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.85rem" }}>
+              {home.promos.map((promo, index) => (
+                <div key={index} className="ea-panel" style={{ padding: "0.85rem", background: "var(--ea-panel-2)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <p className="ea-label" style={{ margin: 0 }}>Баннер {index + 1}</p>
+                    <button type="button" className="ea-btn ea-btn--ghost ea-btn--sm" onClick={() => removeListItem("promos", index)}>
+                      Удалить
+                    </button>
+                  </div>
+                  {(
+                    [
+                      ["title", "Заголовок"],
+                      ["text", "Текст"],
+                      ["cta", "Кнопка"],
+                      ["href", "Ссылка"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <label key={key} style={{ display: "block", marginTop: "0.55rem" }}>
+                      <span className="ea-label">{label}</span>
+                      {key === "text" ? (
+                        <textarea
+                          className="ea-textarea"
+                          value={promo[key]}
+                          onChange={(e) => updatePromo(index, { [key]: e.target.value })}
+                        />
+                      ) : (
+                        <input
+                          className="ea-input"
+                          value={promo[key]}
+                          onChange={(e) => updatePromo(index, { [key]: e.target.value })}
+                        />
+                      )}
+                    </label>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </section>
 
-      {(
-        [
-          ["hits", "Блок хитов", { kicker: "Надзаголовок", title: "Заголовок", ctaLabel: "Текст кнопки" }],
-          ["categories", "Блок категорий", { kicker: "Надзаголовок", title: "Заголовок", ctaLabel: "Текст кнопки" }],
-          ["reviews", "Блок отзывов", { kicker: "Надзаголовок", title: "Заголовок" }],
-        ] as const
-      ).map(([key, title, labels]) => (
-        <section
-          key={key}
-          className="space-y-4 rounded-[1.2rem] border border-[var(--line)] bg-white p-5"
-        >
-          <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
-            {title}
-          </h2>
-          {Object.entries(home[key]).map(([field, value]) => (
-            <label key={field} className="block">
-              <span className="mb-1.5 block text-xs font-bold text-muted uppercase">
-                {labels[field as keyof typeof labels] || field}
-              </span>
-              <input
-                className="input-field"
-                value={String(value)}
-                onChange={(e) =>
-                  setHome((prev) => ({
-                    ...prev,
-                    [key]: { ...prev[key], [field]: e.target.value },
-                  }))
-                }
-              />
-            </label>
+          {(
+            [
+              ["hits", "Блок хитов", { kicker: "Надзаголовок", title: "Заголовок", ctaLabel: "Текст кнопки" }],
+              ["categories", "Блок категорий", { kicker: "Надзаголовок", title: "Заголовок", ctaLabel: "Текст кнопки" }],
+              ["reviews", "Блок отзывов", { kicker: "Надзаголовок", title: "Заголовок" }],
+            ] as const
+          ).map(([key, title, labels]) => (
+            <section key={key} className="ea-panel" style={{ padding: "1rem" }}>
+              <h2 className="ea-panel__title">{title}</h2>
+              <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.85rem" }}>
+                {Object.entries(home[key]).map(([field, value]) => (
+                  <label key={field}>
+                    <span className="ea-label">{labels[field as keyof typeof labels] || field}</span>
+                    <input
+                      className="ea-input"
+                      value={String(value)}
+                      onChange={(e) =>
+                        setHome((prev) => ({
+                          ...prev,
+                          [key]: { ...prev[key], [field]: e.target.value },
+                        }))
+                      }
+                    />
+                  </label>
+                ))}
+              </div>
+            </section>
           ))}
-        </section>
-      ))}
 
-      <section className="space-y-4 rounded-[1.2rem] border border-[var(--line)] bg-white p-5">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
-            Менеджеры
-          </h2>
-          <button
-            type="button"
-            className="btn-outline !min-h-9 !text-sm"
-            onClick={() => addListItem("managers")}
-          >
-            Добавить
+          <section className="ea-panel" style={{ padding: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center" }}>
+              <h2 className="ea-panel__title">Менеджеры</h2>
+              <button type="button" className="ea-btn ea-btn--secondary ea-btn--sm" onClick={() => addListItem("managers")}>
+                Добавить
+              </button>
+            </div>
+            <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.85rem" }}>
+              <label>
+                <span className="ea-label">Надзаголовок</span>
+                <input
+                  className="ea-input"
+                  value={home.managers.kicker}
+                  onChange={(e) =>
+                    setHome((prev) => ({
+                      ...prev,
+                      managers: { ...prev.managers, kicker: e.target.value },
+                    }))
+                  }
+                />
+              </label>
+              <label>
+                <span className="ea-label">Заголовок</span>
+                <input
+                  className="ea-input"
+                  value={home.managers.title}
+                  onChange={(e) =>
+                    setHome((prev) => ({
+                      ...prev,
+                      managers: { ...prev.managers, title: e.target.value },
+                    }))
+                  }
+                />
+              </label>
+              {home.managers.items.map((item, index) => (
+                <div key={index} style={{ display: "grid", gap: "0.5rem", gridTemplateColumns: "1fr 1fr auto" }}>
+                  <input
+                    className="ea-input"
+                    value={item.name}
+                    placeholder="Имя"
+                    onChange={(e) => updateListItem("managers", index, { name: e.target.value })}
+                  />
+                  <input
+                    className="ea-input"
+                    value={item.role}
+                    placeholder="Роль"
+                    onChange={(e) => updateListItem("managers", index, { role: e.target.value })}
+                  />
+                  <button type="button" className="ea-btn ea-btn--ghost ea-btn--sm" onClick={() => removeListItem("managers", index)}>
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="ea-panel" style={{ padding: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center" }}>
+              <h2 className="ea-panel__title">Преимущества</h2>
+              <button type="button" className="ea-btn ea-btn--secondary ea-btn--sm" onClick={() => addListItem("advantages")}>
+                Добавить
+              </button>
+            </div>
+            <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.85rem" }}>
+              <label>
+                <span className="ea-label">Надзаголовок</span>
+                <input
+                  className="ea-input"
+                  value={home.advantages.kicker}
+                  onChange={(e) =>
+                    setHome((prev) => ({
+                      ...prev,
+                      advantages: { ...prev.advantages, kicker: e.target.value },
+                    }))
+                  }
+                />
+              </label>
+              <label>
+                <span className="ea-label">Заголовок</span>
+                <input
+                  className="ea-input"
+                  value={home.advantages.title}
+                  onChange={(e) =>
+                    setHome((prev) => ({
+                      ...prev,
+                      advantages: { ...prev.advantages, title: e.target.value },
+                    }))
+                  }
+                />
+              </label>
+              {home.advantages.items.map((item, index) => (
+                <div key={index} className="ea-panel" style={{ padding: "0.85rem", background: "var(--ea-panel-2)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <p className="ea-label" style={{ margin: 0 }}>Пункт {index + 1}</p>
+                    <button type="button" className="ea-btn ea-btn--ghost ea-btn--sm" onClick={() => removeListItem("advantages", index)}>
+                      Удалить
+                    </button>
+                  </div>
+                  <input
+                    className="ea-input"
+                    style={{ marginTop: "0.55rem" }}
+                    value={item.title}
+                    placeholder="Заголовок"
+                    onChange={(e) => updateListItem("advantages", index, { title: e.target.value })}
+                  />
+                  <textarea
+                    className="ea-textarea"
+                    style={{ marginTop: "0.55rem" }}
+                    value={item.text}
+                    placeholder="Текст"
+                    onChange={(e) => updateListItem("advantages", index, { text: e.target.value })}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="ea-panel" style={{ padding: "1rem" }}>
+            <h2 className="ea-panel__title">Блок заявки</h2>
+            <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.85rem" }}>
+              {(
+                [
+                  ["kicker", "Надзаголовок"],
+                  ["title", "Заголовок"],
+                  ["text", "Текст"],
+                ] as const
+              ).map(([key, label]) => (
+                <label key={key}>
+                  <span className="ea-label">{label}</span>
+                  {key === "text" || key === "title" ? (
+                    <textarea
+                      className="ea-textarea"
+                      value={home.consult[key]}
+                      onChange={(e) =>
+                        setHome((prev) => ({
+                          ...prev,
+                          consult: { ...prev.consult, [key]: e.target.value },
+                        }))
+                      }
+                    />
+                  ) : (
+                    <input
+                      className="ea-input"
+                      value={home.consult[key]}
+                      onChange={(e) =>
+                        setHome((prev) => ({
+                          ...prev,
+                          consult: { ...prev.consult, [key]: e.target.value },
+                        }))
+                      }
+                    />
+                  )}
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <button type="submit" className="ea-btn ea-btn--primary" disabled={pending}>
+            {pending ? "Сохраняем..." : "Сохранить главную"}
           </button>
         </div>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-bold text-muted uppercase">Надзаголовок</span>
-          <input
-            className="input-field"
-            value={home.managers.kicker}
-            onChange={(e) =>
-              setHome((prev) => ({
-                ...prev,
-                managers: { ...prev.managers, kicker: e.target.value },
-              }))
-            }
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-bold text-muted uppercase">Заголовок</span>
-          <input
-            className="input-field"
-            value={home.managers.title}
-            onChange={(e) =>
-              setHome((prev) => ({
-                ...prev,
-                managers: { ...prev.managers, title: e.target.value },
-              }))
-            }
-          />
-        </label>
-        {home.managers.items.map((item, index) => (
-          <div key={index} className="grid gap-3 rounded-xl border border-[var(--line)] p-4 sm:grid-cols-[1fr_1fr_auto]">
-            <input
-              className="input-field"
-              value={item.name}
-              placeholder="Имя"
-              onChange={(e) => updateListItem("managers", index, { name: e.target.value })}
-            />
-            <input
-              className="input-field"
-              value={item.role}
-              placeholder="Роль"
-              onChange={(e) => updateListItem("managers", index, { role: e.target.value })}
-            />
-            <button
-              type="button"
-              className="text-sm font-semibold text-azure"
-              onClick={() => removeListItem("managers", index)}
-            >
-              Удалить
+
+        <div className="ea-preview">
+          <div className="ea-preview__bar">
+            <span>Live preview · главная</span>
+            <button type="button" className="ea-btn ea-btn--ghost ea-btn--sm" onClick={() => setPreviewKey((k) => k + 1)}>
+              Обновить
             </button>
           </div>
-        ))}
-      </section>
-
-      <section className="space-y-4 rounded-[1.2rem] border border-[var(--line)] bg-white p-5">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
-            Преимущества
-          </h2>
-          <button
-            type="button"
-            className="btn-outline !min-h-9 !text-sm"
-            onClick={() => addListItem("advantages")}
-          >
-            Добавить
-          </button>
+          <iframe key={previewKey} src={`/?preview=${previewKey}`} title="Превью главной" />
         </div>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-bold text-muted uppercase">Надзаголовок</span>
-          <input
-            className="input-field"
-            value={home.advantages.kicker}
-            onChange={(e) =>
-              setHome((prev) => ({
-                ...prev,
-                advantages: { ...prev.advantages, kicker: e.target.value },
-              }))
-            }
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-bold text-muted uppercase">Заголовок</span>
-          <input
-            className="input-field"
-            value={home.advantages.title}
-            onChange={(e) =>
-              setHome((prev) => ({
-                ...prev,
-                advantages: { ...prev.advantages, title: e.target.value },
-              }))
-            }
-          />
-        </label>
-        {home.advantages.items.map((item, index) => (
-          <div key={index} className="space-y-3 rounded-xl border border-[var(--line)] p-4">
-            <div className="flex justify-between">
-              <p className="text-xs font-bold text-muted uppercase">Пункт {index + 1}</p>
-              <button
-                type="button"
-                className="text-sm font-semibold text-azure"
-                onClick={() => removeListItem("advantages", index)}
-              >
-                Удалить
-              </button>
-            </div>
-            <input
-              className="input-field"
-              value={item.title}
-              placeholder="Заголовок"
-              onChange={(e) => updateListItem("advantages", index, { title: e.target.value })}
-            />
-            <textarea
-              className="input-field min-h-20"
-              value={item.text}
-              placeholder="Текст"
-              onChange={(e) => updateListItem("advantages", index, { text: e.target.value })}
-            />
-          </div>
-        ))}
-      </section>
-
-      <section className="space-y-4 rounded-[1.2rem] border border-[var(--line)] bg-white p-5">
-        <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
-          Блок заявки
-        </h2>
-        {(
-          [
-            ["kicker", "Надзаголовок"],
-            ["title", "Заголовок"],
-            ["text", "Текст"],
-          ] as const
-        ).map(([key, label]) => (
-          <label key={key} className="block">
-            <span className="mb-1.5 block text-xs font-bold text-muted uppercase">{label}</span>
-            {key === "text" || key === "title" ? (
-              <textarea
-                className="input-field min-h-20"
-                value={home.consult[key]}
-                onChange={(e) =>
-                  setHome((prev) => ({
-                    ...prev,
-                    consult: { ...prev.consult, [key]: e.target.value },
-                  }))
-                }
-              />
-            ) : (
-              <input
-                className="input-field"
-                value={home.consult[key]}
-                onChange={(e) =>
-                  setHome((prev) => ({
-                    ...prev,
-                    consult: { ...prev.consult, [key]: e.target.value },
-                  }))
-                }
-              />
-            )}
-          </label>
-        ))}
-      </section>
-
-      <button type="submit" className="btn-primary" disabled={pending}>
-        {pending ? "Сохраняем..." : "Сохранить главную"}
-      </button>
+      </div>
     </form>
   );
 }
