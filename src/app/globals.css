@@ -520,7 +520,7 @@ a {
 }
 
 .mobile-nav[open] > summary .mobile-nav__close {
-  display: inline;
+  display: block;
 }
 
 .modal-backdrop {

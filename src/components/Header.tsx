@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CallbackModal } from "@/components/CallbackModal";
 import { useCart } from "@/components/CartProvider";
+import { IconBag, IconClose, IconMenu, IconPhone } from "@/components/icons";
 import { NAV_LINKS, SITE, type CategoryDTO } from "@/lib/content";
 
 export function Header({ categories }: { categories: CategoryDTO[] }) {
@@ -98,41 +99,14 @@ export function Header({ categories }: { categories: CategoryDTO[] }) {
               aria-label="Обратный звонок"
               onClick={() => setCallbackOpen(true)}
             >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-                className="block"
-              >
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z" />
-              </svg>
+              <IconPhone />
             </button>
             <Link
               href="/cart"
               className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-white text-navy transition hover:border-azure/40"
               aria-label={`Корзина${count > 0 ? `, товаров: ${count}` : ""}`}
             >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-                className="block"
-              >
-                <path d="M6 8h12l-1.1 10.1a2 2 0 0 1-2 1.9H9.1a2 2 0 0 1-2-1.9L6 8Z" />
-                <path d="M9 8V6.5A3 3 0 0 1 12 3.5 3 3 0 0 1 15 6.5V8" />
-              </svg>
+              <IconBag />
               {count > 0 ? (
                 <span className="absolute -top-1 -right-1 inline-flex min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[0.65rem] font-bold leading-none text-white">
                   {count}
@@ -145,12 +119,8 @@ export function Header({ categories }: { categories: CategoryDTO[] }) {
                 className="inline-flex h-10 w-10 shrink-0 list-none items-center justify-center rounded-full border border-[var(--line)] bg-white text-navy [&::-webkit-details-marker]:hidden"
                 aria-label="Меню"
               >
-                <span className="mobile-nav__icon text-lg leading-none" aria-hidden>
-                  ≡
-                </span>
-                <span className="mobile-nav__close hidden text-lg leading-none" aria-hidden>
-                  ×
-                </span>
+                <IconMenu className="mobile-nav__icon block" />
+                <IconClose className="mobile-nav__close hidden" />
               </summary>
 
               <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[min(22rem,calc(100vw-1.5rem))] rounded-2xl border border-[var(--line)] bg-white shadow-[0_24px_60px_rgba(20,17,22,0.16)]">
