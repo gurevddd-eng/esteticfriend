@@ -1,8 +1,10 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { saveProduct, uploadProductImage } from "@/actions/admin";
+import { AdminCard, AdminPageHeader } from "@/components/admin/ui";
 
 type Category = { id: string; name: string };
 type Product = {
@@ -76,11 +78,18 @@ export function ProductForm({
 
   return (
     <div className="max-w-3xl">
-      <h1 className="font-[family-name:var(--font-syne)] text-3xl font-bold text-navy">
-        {product?.id ? "Редактировать товар" : "Новый товар"}
-      </h1>
+      <AdminPageHeader
+        title={product?.id ? "Редактировать товар" : "Новый товар"}
+        description="Карточка аппарата для каталога и хитов на главной."
+        actions={
+          <Link href="/admin/products" className="btn-outline !min-h-10 !text-sm">
+            ← К списку
+          </Link>
+        }
+      />
 
-      <form onSubmit={onSubmit} className="mt-8 space-y-4 rounded-[1.2rem] border border-[var(--line)] bg-white p-6">
+      <AdminCard className="p-6">
+      <form onSubmit={onSubmit} className="space-y-4">
         <label className="block">
           <span className="mb-1.5 block text-xs font-bold text-muted uppercase">Название</span>
           <input name="name" required className="input-field" defaultValue={product?.name || ""} />
@@ -159,28 +168,28 @@ export function ProductForm({
           ))}
         </div>
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm text-rose-700">{error}</p> : null}
         <button type="submit" className="btn-primary">
           Сохранить
         </button>
       </form>
+      </AdminCard>
 
-      <form
-        onSubmit={onUpload}
-        className="mt-4 space-y-3 rounded-[1.2rem] border border-[var(--line)] bg-white p-6"
-      >
-        <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold text-navy">
+      <AdminCard className="mt-4 p-6">
+      <form onSubmit={onUpload} className="space-y-3">
+        <h2 className="font-[family-name:var(--font-syne)] text-lg font-bold text-[#17141a]">
           Загрузить фото
         </h2>
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt="" className="h-32 w-32 rounded-xl object-contain bg-pearl" />
+          <img src={imageUrl} alt="" className="h-32 w-32 rounded-xl object-contain bg-[#f3f1ef]" />
         ) : null}
         <input type="file" name="file" accept="image/*" required />
         <button type="submit" className="btn-outline" disabled={uploading}>
           {uploading ? "Загрузка..." : "Загрузить"}
         </button>
       </form>
+      </AdminCard>
     </div>
   );
 }

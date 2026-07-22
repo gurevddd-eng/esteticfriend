@@ -1,17 +1,6 @@
-import Link from "next/link";
-import { logoutAdmin } from "@/actions/auth";
+import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/session";
-
-const NAV = [
-  { href: "/admin", label: "Обзор" },
-  { href: "/admin/homepage", label: "Главная" },
-  { href: "/admin/categories", label: "Категории" },
-  { href: "/admin/products", label: "Товары" },
-  { href: "/admin/leads", label: "Заявки" },
-  { href: "/admin/reviews", label: "Отзывы" },
-  { href: "/admin/pages", label: "Страницы" },
-  { href: "/admin/settings", label: "Настройки" },
-];
+import { AdminShell, type AdminNavItem } from "@/components/admin/ui";
 
 export default async function AdminLayout({
   children,
@@ -22,45 +11,25 @@ export default async function AdminLayout({
   const isAdmin = Boolean(session.isLoggedIn && session.adminId);
 
   if (!isAdmin) {
-    return <div className="min-h-screen bg-mist">{children}</div>;
+    return <div className="min-h-screen bg-[#f3f1ef]">{children}</div>;
   }
 
+  const newLeads = await prisma.lead.count({ where: { status: "NEW" } });
+
+  const nav: AdminNavItem[] = [
+    { href: "/admin", label: "Обзор" },
+    { href: "/admin/leads", label: "Заявки", badge: newLeads },
+    { href: "/admin/products", label: "Товары" },
+    { href: "/admin/categories", label: "Категории" },
+    { href: "/admin/homepage", label: "Главная" },
+    { href: "/admin/pages", label: "Страницы" },
+    { href: "/admin/reviews", label: "Отзывы" },
+    { href: "/admin/settings", label: "Настройки" },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#f4f1ef] lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="border-b border-[var(--line)] bg-white lg:border-b-0 lg:border-r">
-        <div className="px-5 py-5">
-          <Link href="/admin" className="brand-mark text-sm text-navy">
-            ESTETIC ADMIN
-          </Link>
-          <p className="mt-1 text-xs text-muted">{session.email}</p>
-        </div>
-        <nav className="flex gap-1 overflow-x-auto px-3 pb-4 lg:flex-col lg:overflow-visible">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-semibold text-navy/80 transition hover:bg-accent-soft hover:text-navy"
-            >
-              {item.label}
-            </Link>
-          ))}
-          <Link
-            href="/"
-            className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-semibold text-muted transition hover:bg-pearl hover:text-navy"
-          >
-            На сайт
-          </Link>
-          <form action={logoutAdmin} className="px-1 pt-2">
-            <button
-              type="submit"
-              className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-azure"
-            >
-              Выйти
-            </button>
-          </form>
-        </nav>
-      </aside>
-      <div className="p-5 md:p-8">{children}</div>
-    </div>
+    <AdminShell email={session.email} name={session.name} nav={nav}>
+      {children}
+    </AdminShell>
   );
 }

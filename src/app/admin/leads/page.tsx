@@ -1,25 +1,28 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { LeadsAdminClient } from "./LeadsAdminClient";
 
-export default async function AdminLeadsPage() {
+async function LeadsInner() {
   const leads = await prisma.lead.findMany({
-    include: { product: { select: { name: true } } },
     orderBy: { createdAt: "desc" },
-    take: 100,
+    take: 300,
+    include: { product: { select: { id: true, name: true, slug: true } } },
   });
 
   return (
     <LeadsAdminClient
-      leads={leads.map((l) => ({
-        id: l.id,
-        name: l.name,
-        phone: l.phone,
-        message: l.message,
-        source: l.source,
-        itemsJson: l.itemsJson,
-        createdAt: l.createdAt.toISOString(),
-        product: l.product,
+      leads={leads.map((lead) => ({
+        ...lead,
+        createdAt: lead.createdAt.toISOString(),
       }))}
     />
+  );
+}
+
+export default function AdminLeadsPage() {
+  return (
+    <Suspense fallback={<p className="text-sm text-[#6f6764]">Загрузка заявок...</p>}>
+      <LeadsInner />
+    </Suspense>
   );
 }

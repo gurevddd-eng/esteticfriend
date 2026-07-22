@@ -11,6 +11,13 @@ enum Role {
   ADMIN
 }
 
+enum LeadStatus {
+  NEW
+  IN_PROGRESS
+  DONE
+  SPAM
+}
+
 model AdminUser {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -52,15 +59,18 @@ model Product {
 }
 
 model Lead {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   name      String
   phone     String
   message   String?
   source    String?
+  status    LeadStatus @default(NEW)
+  notes     String     @default("")
   productId String?
-  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  product   Product?   @relation(fields: [productId], references: [id], onDelete: SetNull)
   itemsJson String?
-  createdAt DateTime @default(now())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model Page {
@@ -68,6 +78,7 @@ model Page {
   slug      String   @unique
   title     String
   content   String   @default("")
+  isPublished Boolean @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

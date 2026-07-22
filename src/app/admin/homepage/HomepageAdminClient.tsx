@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveHomepage } from "@/actions/admin";
+import { AdminPageHeader } from "@/components/admin/ui";
 import type { HomepageContent } from "@/lib/site";
 
 export function HomepageAdminClient({ initial }: { initial: HomepageContent }) {
@@ -104,22 +105,17 @@ export function HomepageAdminClient({ initial }: { initial: HomepageContent }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-[family-name:var(--font-syne)] text-3xl font-bold text-navy">
-            Главная страница
-          </h1>
-          <p className="mt-2 text-sm text-muted">
-            Редактируйте тексты и блоки главной. Хиты, категории и отзывы берутся из
-            соответствующих разделов админки.
-          </p>
-        </div>
-        <button type="submit" className="btn-primary" disabled={pending}>
-          {pending ? "Сохраняем..." : "Сохранить"}
-        </button>
-      </div>
-      {message ? <p className="text-sm text-azure">{message}</p> : null}
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      <AdminPageHeader
+        title="Главная страница"
+        description="Редактируйте тексты и блоки главной. Хиты, категории и отзывы берутся из соответствующих разделов."
+        actions={
+          <button type="submit" className="btn-primary" disabled={pending}>
+            {pending ? "Сохраняем..." : "Сохранить"}
+          </button>
+        }
+      />
+      {message ? <p className="text-sm text-[#b53d4a]">{message}</p> : null}
+      {error ? <p className="text-sm text-rose-700">{error}</p> : null}
 
       <section className="space-y-4 rounded-[1.2rem] border border-[var(--line)] bg-white p-5">
         <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">Hero</h2>
@@ -210,11 +206,11 @@ export function HomepageAdminClient({ initial }: { initial: HomepageContent }) {
 
       {(
         [
-          ["hits", "Блок хитов"],
-          ["categories", "Блок категорий"],
-          ["reviews", "Блок отзывов"],
+          ["hits", "Блок хитов", { kicker: "Надзаголовок", title: "Заголовок", ctaLabel: "Текст кнопки" }],
+          ["categories", "Блок категорий", { kicker: "Надзаголовок", title: "Заголовок", ctaLabel: "Текст кнопки" }],
+          ["reviews", "Блок отзывов", { kicker: "Надзаголовок", title: "Заголовок" }],
         ] as const
-      ).map(([key, title]) => (
+      ).map(([key, title, labels]) => (
         <section
           key={key}
           className="space-y-4 rounded-[1.2rem] border border-[var(--line)] bg-white p-5"
@@ -224,7 +220,9 @@ export function HomepageAdminClient({ initial }: { initial: HomepageContent }) {
           </h2>
           {Object.entries(home[key]).map(([field, value]) => (
             <label key={field} className="block">
-              <span className="mb-1.5 block text-xs font-bold text-muted uppercase">{field}</span>
+              <span className="mb-1.5 block text-xs font-bold text-muted uppercase">
+                {labels[field as keyof typeof labels] || field}
+              </span>
               <input
                 className="input-field"
                 value={String(value)}

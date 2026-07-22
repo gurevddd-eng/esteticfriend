@@ -3,6 +3,12 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteReview, saveReview } from "@/actions/admin";
+import {
+  AdminBadge,
+  AdminCard,
+  AdminPageHeader,
+  confirmDelete,
+} from "@/components/admin/ui";
 
 type ReviewRow = {
   id: string;
@@ -39,37 +45,38 @@ export function ReviewsAdminClient({ reviews }: { reviews: ReviewRow[] }) {
 
   return (
     <div>
-      <h1 className="font-[family-name:var(--font-syne)] text-3xl font-bold text-navy">
-        Отзывы
-      </h1>
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <AdminPageHeader
+        title="Отзывы"
+        description="Отзывы на главной. Скрытые не показываются посетителям."
+      />
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-3">
           {reviews.map((r) => (
-            <article
-              key={r.id}
-              className="rounded-[1.2rem] border border-[var(--line)] bg-white p-4"
-            >
+            <AdminCard key={r.id} className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="font-bold text-navy">{r.title}</h2>
-                  <p className="text-sm text-muted">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-bold text-[#17141a]">{r.title}</h2>
+                    {!r.isActive ? <AdminBadge>Скрыт</AdminBadge> : null}
+                  </div>
+                  <p className="text-sm text-[#6f6764]">
                     {r.author}
-                    {r.age ? `, ${r.age}` : ""}
-                    {!r.isActive ? " · скрыт" : ""}
+                    {r.age ? `, ${r.age}` : ""} · порядок {r.sortOrder}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     type="button"
-                    className="text-xs font-semibold text-navy"
+                    className="text-sm font-semibold text-[#b53d4a]"
                     onClick={() => setEditing(r)}
                   >
                     Изменить
                   </button>
                   <button
                     type="button"
-                    className="text-xs font-semibold text-azure"
+                    className="text-sm font-semibold text-rose-700"
                     onClick={async () => {
+                      if (!confirmDelete("Удалить отзыв?")) return;
                       await deleteReview(r.id);
                       router.refresh();
                     }}
@@ -78,73 +85,33 @@ export function ReviewsAdminClient({ reviews }: { reviews: ReviewRow[] }) {
                   </button>
                 </div>
               </div>
-              <p className="mt-2 text-sm text-ink/80">{r.text}</p>
-            </article>
+              <p className="mt-2 text-sm text-[#4a4441]">{r.text}</p>
+            </AdminCard>
           ))}
         </div>
 
-        <form
-          key={editing?.id || "new"}
-          onSubmit={onSubmit}
-          className="h-fit space-y-4 rounded-[1.2rem] border border-[var(--line)] bg-white p-5"
-        >
-          <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
-            {editing ? "Редактировать" : "Новый отзыв"}
-          </h2>
-          <input
-            name="author"
-            required
-            className="input-field"
-            placeholder="Автор"
-            defaultValue={editing?.author || ""}
-          />
-          <input
-            name="age"
-            type="number"
-            className="input-field"
-            placeholder="Возраст"
-            defaultValue={editing?.age ?? ""}
-          />
-          <input
-            name="title"
-            required
-            className="input-field"
-            placeholder="Заголовок"
-            defaultValue={editing?.title || ""}
-          />
-          <textarea
-            name="text"
-            required
-            className="input-field min-h-28"
-            placeholder="Текст"
-            defaultValue={editing?.text || ""}
-          />
-          <input
-            name="sortOrder"
-            type="number"
-            className="input-field"
-            placeholder="Порядок"
-            defaultValue={editing?.sortOrder ?? 0}
-          />
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              name="isActive"
-              type="checkbox"
-              defaultChecked={editing?.isActive ?? true}
-            />
-            Показывать на сайте
-          </label>
-          <div className="flex gap-2">
-            <button type="submit" className="btn-primary">
-              Сохранить
-            </button>
-            {editing ? (
-              <button type="button" className="btn-outline" onClick={() => setEditing(null)}>
-                Отмена
-              </button>
-            ) : null}
-          </div>
-        </form>
+        <AdminCard className="h-fit p-5">
+          <form key={editing?.id || "new"} onSubmit={onSubmit} className="space-y-4">
+            <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-[#17141a]">
+              {editing ? "Редактировать" : "Новый отзыв"}
+            </h2>
+            <input name="author" required className="input-field" placeholder="Автор" defaultValue={editing?.author || ""} />
+            <input name="age" type="number" className="input-field" placeholder="Возраст" defaultValue={editing?.age ?? ""} />
+            <input name="title" required className="input-field" placeholder="Заголовок" defaultValue={editing?.title || ""} />
+            <textarea name="text" required className="input-field min-h-28" placeholder="Текст" defaultValue={editing?.text || ""} />
+            <input name="sortOrder" type="number" className="input-field" placeholder="Порядок" defaultValue={editing?.sortOrder ?? 0} />
+            <label className="flex items-center gap-2 text-sm font-semibold">
+              <input name="isActive" type="checkbox" defaultChecked={editing?.isActive ?? true} />
+              Показывать на сайте
+            </label>
+            <div className="flex gap-2">
+              <button type="submit" className="btn-primary">Сохранить</button>
+              {editing ? (
+                <button type="button" className="btn-outline" onClick={() => setEditing(null)}>Отмена</button>
+              ) : null}
+            </div>
+          </form>
+        </AdminCard>
       </div>
     </div>
   );
