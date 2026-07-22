@@ -1,11 +1,9 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { loginAdmin } from "@/actions/auth";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -23,45 +21,36 @@ export default function AdminLoginPage() {
       setError(res.error || "Ошибка входа");
       return;
     }
-    router.push("/admin");
-    router.refresh();
+    window.location.assign("/admin");
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-6">
-      <form
-        onSubmit={onSubmit}
-        className="w-full max-w-md rounded-[1.4rem] border border-[var(--line)] bg-white p-8 shadow-[0_20px_50px_rgba(20,17,22,0.08)]"
-      >
-        <p className="section-kicker">Админ-панель</p>
-        <h1 className="mt-2 font-[family-name:var(--font-syne)] text-2xl font-bold text-navy">
-          Вход
-        </h1>
-        <div className="mt-6 space-y-4">
-          <label className="block">
-            <span className="mb-1.5 block text-xs font-bold tracking-wide text-muted uppercase">
-              Email
-            </span>
-            <input
-              name="email"
-              type="email"
-              required
-              className="input-field"
-              defaultValue="admin@esteticfriend.local"
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1.5 block text-xs font-bold tracking-wide text-muted uppercase">
-              Пароль
-            </span>
-            <input name="password" type="password" required className="input-field" />
-          </label>
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
-          <button type="submit" className="btn-primary w-full" disabled={pending}>
-            {pending ? "Вход..." : "Войти"}
-          </button>
-        </div>
-      </form>
-    </div>
+    <form onSubmit={onSubmit} className="ea-login-card">
+      <p className="ea-kicker">Estetic Admin</p>
+      <h1 className="ea-h1" style={{ marginTop: "0.4rem" }}>
+        Вход в панель
+      </h1>
+      <p className="ea-sub">Управление каталогом, заявками и контентом сайта.</p>
+      <div style={{ marginTop: "1.25rem", display: "grid", gap: "0.85rem" }}>
+        <label>
+          <span className="ea-label">Email</span>
+          <input name="email" type="email" required autoComplete="username" className="ea-input" />
+        </label>
+        <label>
+          <span className="ea-label">Пароль</span>
+          <input
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            className="ea-input"
+          />
+        </label>
+        {error ? <p style={{ margin: 0, color: "var(--ea-danger)", fontWeight: 700 }}>{error}</p> : null}
+        <button type="submit" className="ea-btn ea-btn--primary" disabled={pending}>
+          {pending ? "Вход..." : "Войти"}
+        </button>
+      </div>
+    </form>
   );
 }

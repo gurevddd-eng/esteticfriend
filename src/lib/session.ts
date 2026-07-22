@@ -8,16 +8,27 @@ export type AdminSessionData = {
   name?: string;
 };
 
+function isSecureCookie() {
+  if (process.env.COOKIE_SECURE === "true") return true;
+  if (process.env.COOKIE_SECURE === "false") return false;
+  const appUrl = process.env.APP_URL || "";
+  if (appUrl.startsWith("https://")) return true;
+  if (appUrl.startsWith("http://")) return false;
+  return process.env.NODE_ENV === "production";
+}
+
+const sessionPassword =
+  process.env.SESSION_SECRET || "complex_password_at_least_32_characters_long";
+
 export const sessionOptions: SessionOptions = {
-  password:
-    process.env.SESSION_SECRET ||
-    "complex_password_at_least_32_characters_long",
+  password: sessionPassword,
   cookieName: "esteticfriend_admin",
   cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecureCookie(),
     httpOnly: true,
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 14,
+    path: "/",
   },
 };
 

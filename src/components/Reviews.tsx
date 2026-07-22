@@ -1,11 +1,18 @@
 import type { ReviewDTO } from "@/lib/content";
+import type { HomepageContent } from "@/lib/site";
 
-export function Reviews({ reviews }: { reviews: ReviewDTO[] }) {
+export function Reviews({
+  reviews,
+  content,
+}: {
+  reviews: ReviewDTO[];
+  content: HomepageContent["reviews"];
+}) {
   return (
     <section className="section-pad">
       <div className="container-shell">
-        <p className="section-kicker">Отзывы</p>
-        <h2 className="section-title mt-3">Отзывы наших клиентов</h2>
+        <p className="section-kicker">{content.kicker}</p>
+        <h2 className="section-title mt-3">{content.title}</h2>
 
         <div className="mt-10 grid gap-5 md:grid-cols-2">
           {reviews.map((review) => (

@@ -1,13 +1,19 @@
-import { MANAGERS } from "@/lib/content";
+import type { HomepageContent } from "@/lib/site";
 
-export function Managers() {
+export function Managers({
+  kicker,
+  title,
+  items,
+}: HomepageContent["managers"]) {
+  if (!items.length) return null;
+
   return (
     <section className="section-pad bg-white">
       <div className="container-shell">
-        <p className="section-kicker">Команда</p>
-        <h2 className="section-title mt-3">Наши специалисты отдела продаж</h2>
+        <p className="section-kicker">{kicker}</p>
+        <h2 className="section-title mt-3">{title}</h2>
         <div className="mt-10 grid gap-5 sm:grid-cols-3">
-          {MANAGERS.map((m) => (
+          {items.map((m) => (
             <article
               key={m.name}
               className="rounded-[1.4rem] border border-[var(--line)] bg-pearl/50 p-6 text-center"
