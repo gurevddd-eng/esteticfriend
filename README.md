@@ -1,24 +1,34 @@
 # ESTETIC FRIEND
 
-Дизайн-версия сайта поставщика профессионального косметического оборудования.
+Сайт поставщика профессионального косметического оборудования.
 
-- **Контент:** [Estetic Friend](https://esteticfriend.tilda.ws/main)
-- **Стек:** Next.js 16 · React 19 · Tailwind CSS 4
-
-Данные каталога и отзывов — из статического контента (`src/lib/content.ts`). Без базы данных.
+**Стек:** Next.js 16 · React 19 · Tailwind CSS 4 · PostgreSQL · Prisma
 
 ## Быстрый старт
 
 ```bash
 npm install
+# PostgreSQL должен быть доступен (см. .env.example)
+npx prisma db push
+npm run db:seed
 npm run dev
 ```
 
-Сайт: [http://localhost:3000](http://localhost:3000)
+- Сайт: http://localhost:3000  
+- Админка: http://localhost:3000/admin/login  
+- Логин по умолчанию: `admin@esteticfriend.local` / `admin12345`
 
-## Страницы
+## Админ-панель
 
-- `/` — главная
-- `/catalog`, `/catalog/[slug]` — каталог
-- `/product/[slug]` — карточка аппарата
+- Категории и товары (CRUD, загрузка фото, новинка/хит/наличие)
+- Заявки с сайта и из корзины
+- Отзывы
+- Тексты страниц (доставка, гарантия, обучение и др.)
+- Настройки контактов и блока «О компании»
+
+## Страницы сайта
+
+- `/` — главная  
+- `/catalog`, `/product/[slug]` — каталог  
+- `/cart` — корзина и оформление заказа  
 - `/delivery`, `/warranty`, `/certificates`, `/training`, `/contacts`

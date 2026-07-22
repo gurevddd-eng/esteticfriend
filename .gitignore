@@ -32,6 +32,11 @@ yarn-error.log*
 
 # env files
 .env*
+!.env.example
+
+# uploads (keep folder)
+/public/uploads/*
+!/public/uploads/.gitkeep
 
 # vercel
 .vercel

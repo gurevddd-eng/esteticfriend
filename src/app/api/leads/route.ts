@@ -8,6 +8,15 @@ const leadSchema = z.object({
   message: z.string().optional(),
   source: z.string().optional(),
   productId: z.string().optional(),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().optional(),
+        name: z.string(),
+        quantity: z.number().int().positive(),
+      }),
+    )
+    .optional(),
 });
 
 export async function POST(request: Request) {

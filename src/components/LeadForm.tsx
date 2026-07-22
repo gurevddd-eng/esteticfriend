@@ -7,6 +7,7 @@ type LeadFormProps = {
   productId?: string;
   productName?: string;
   compact?: boolean;
+  onSuccess?: () => void;
 };
 
 export function LeadForm({
@@ -14,6 +15,7 @@ export function LeadForm({
   productId,
   productName,
   compact = false,
+  onSuccess,
 }: LeadFormProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -45,6 +47,7 @@ export function LeadForm({
       setPhone("");
       setMessage("");
       setAgree(false);
+      onSuccess?.();
     } catch {
       setStatus("error");
     }

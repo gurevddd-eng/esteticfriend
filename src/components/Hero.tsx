@@ -12,18 +12,18 @@ export function Hero() {
             {SITE.name}
           </p>
           <h1 className="animate-rise-delay mt-5 font-[family-name:var(--font-syne)] leading-[1.05] font-bold tracking-[-0.03em] text-white">
-            {SITE.tagline}
+            Косметологические аппараты для салонов красоты
           </h1>
           <p className="animate-rise-delay-2 mt-5 max-w-xl text-base leading-relaxed text-white/75 md:text-lg">
-            Поставка оборудования для эстетической косметологии, обучение и сервис
-            в Москве и Санкт-Петербурге.
+            Более 1000 специалистов уже работают на подобном оборудовании. Подберём
+            аппарат под задачи вашего кабинета.
           </p>
           <div className="animate-rise-delay-2 mt-9 flex flex-wrap gap-3">
-            <Link href="/#consult" className="btn-primary">
-              Получить консультацию
+            <Link href="/catalog" className="btn-primary">
+              Перейти в каталог
             </Link>
-            <Link href="/catalog" className="btn-ghost">
-              Смотреть каталог
+            <Link href="/#consult" className="btn-ghost">
+              Получить консультацию
             </Link>
           </div>
         </div>

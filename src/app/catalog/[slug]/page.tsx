@@ -48,7 +48,7 @@ export default async function CategoryPage({ params }: Props) {
               href={`/catalog/${item.slug}`}
               className={`rounded-full px-4 py-2 text-sm font-semibold ${
                 item.slug === slug
-                  ? "bg-navy text-white"
+                  ? "bg-navy !text-white"
                   : "border border-[var(--line)] bg-white text-navy hover:border-azure hover:text-azure"
               }`}
             >
@@ -58,14 +58,14 @@ export default async function CategoryPage({ params }: Props) {
         </div>
 
         {products.length ? (
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
           <div className="mt-12 rounded-[1.4rem] border border-[var(--line)] bg-white p-10 text-center">
-            <p className="text-navy font-semibold">В этой категории пока нет позиций</p>
+            <p className="font-semibold text-navy">В этой категории пока нет позиций</p>
             <p className="mt-2 text-sm text-muted">
               Оставьте заявку — подберём подходящий аппарат под ваши задачи.
             </p>

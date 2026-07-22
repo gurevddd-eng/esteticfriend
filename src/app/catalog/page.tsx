@@ -18,13 +18,16 @@ export default async function CatalogPage() {
     <div className="section-pad">
       <div className="container-shell">
         <p className="section-kicker">Каталог</p>
-        <h1 className="section-title mt-3">Каталог оборудования</h1>
+        <h1 className="section-title mt-3">Каталог косметологического оборудования</h1>
         <p className="mt-4 max-w-2xl text-muted">
-          Выберите направление или посмотрите все аппараты в наличии.
+          Выберите направление или посмотрите все аппараты.
         </p>
 
         <div className="mt-8 flex flex-wrap gap-2">
-          <Link href="/catalog" className="rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white">
+          <Link
+            href="/catalog"
+            className="rounded-full bg-navy px-4 py-2 text-sm font-semibold !text-white"
+          >
             Все
           </Link>
           {categories.map((category) => (
@@ -38,7 +41,7 @@ export default async function CatalogPage() {
           ))}
         </div>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

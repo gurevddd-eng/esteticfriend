@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, Unbounded } from "next/font/google";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
+import { Providers } from "@/components/Providers";
+import { SiteChrome } from "@/components/SiteChrome";
 import { getCategories } from "@/lib/catalog";
 import { SITE } from "@/lib/content";
 import "./globals.css";
@@ -35,9 +35,9 @@ export default async function RootLayout({
   return (
     <html lang="ru" className={`${manrope.variable} ${unbounded.variable} h-full`}>
       <body className="flex min-h-full flex-col antialiased">
-        <Header categories={categories} />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <Providers>
+          <SiteChrome categories={categories}>{children}</SiteChrome>
+        </Providers>
       </body>
     </html>
   );

@@ -1,8 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AddToCartButton } from "@/components/AddToCartButton";
+import { formatPrice } from "@/lib/format";
 import type { ProductDTO } from "@/lib/content";
 
 export function ProductCard({ product }: { product: ProductDTO }) {
+  const priceLabel = formatPrice(product.price);
+
   return (
     <article className="product-tile">
       <Link href={`/product/${product.slug}`} className="product-visual block">
@@ -17,7 +21,7 @@ export function ProductCard({ product }: { product: ProductDTO }) {
         ) : (
           <span className="device-silhouette" />
         )}
-        <div className="absolute top-3 left-3 z-10 flex gap-2">
+        <div className="absolute top-3 left-3 z-10 flex flex-wrap gap-2">
           {product.isNew ? <span className="badge badge-new">Новинка</span> : null}
           {product.isHit ? (
             <span className="badge bg-white/90 text-navy">Хит</span>
@@ -34,18 +38,30 @@ export function ProductCard({ product }: { product: ProductDTO }) {
             {product.category.name}
           </Link>
         ) : null}
-        <h3 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
+        <h3 className="font-[family-name:var(--font-syne)] text-lg font-bold leading-snug text-navy">
           <Link href={`/product/${product.slug}`}>{product.name}</Link>
         </h3>
-        <p className="line-clamp-3 flex-1 text-sm leading-relaxed text-muted">
+        <p className="line-clamp-2 flex-1 text-sm leading-relaxed text-muted">
           {product.shortDesc}
         </p>
-        <div className="mt-2 flex items-center justify-between gap-3">
-          {product.inStock ? (
-            <span className="badge badge-stock">В наличии</span>
+        <div className="mt-1">
+          {priceLabel ? (
+            <p className="text-lg font-bold text-navy">{priceLabel}</p>
           ) : (
-            <span className="badge bg-pearl text-muted">Под заказ</span>
+            <p className="text-sm font-semibold text-muted">Цена по запросу</p>
           )}
+        </div>
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          <AddToCartButton
+            product={{
+              id: product.id,
+              slug: product.slug,
+              name: product.name,
+              imageUrl: product.imageUrl,
+            }}
+            className="btn-primary !min-h-9 !px-4 !text-sm"
+            label="Купить"
+          />
           <Link href={`/product/${product.slug}`} className="btn-outline !min-h-9 !px-4 !text-sm">
             Подробнее
           </Link>

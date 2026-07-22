@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LeadForm } from "@/components/LeadForm";
+import { AddToCartButton } from "@/components/AddToCartButton";
+import { BuyOneClick } from "@/components/BuyOneClick";
+import { formatPrice } from "@/lib/format";
 import { getProductBySlug } from "@/lib/catalog";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -22,10 +24,31 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
+  const priceLabel = formatPrice(product.price);
+
   return (
     <div className="section-pad">
-      <div className="container-shell grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-        <div>
+      <div className="container-shell">
+        <p className="text-sm text-muted">
+          <Link href="/catalog" className="hover:text-azure">
+            Каталог
+          </Link>
+          {product.category ? (
+            <>
+              {" / "}
+              <Link
+                href={`/catalog/${product.category.slug}`}
+                className="hover:text-azure"
+              >
+                {product.category.name}
+              </Link>
+            </>
+          ) : null}
+          {" / "}
+          {product.name}
+        </p>
+
+        <div className="mt-6 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="product-visual !aspect-[5/4] rounded-[1.6rem] border border-[var(--line)]">
             {product.imageUrl ? (
               <Image
@@ -46,41 +69,53 @@ export default async function ProductPage({ params }: Props) {
               ) : null}
             </div>
           </div>
-        </div>
 
-        <div>
-          {product.category ? (
-            <Link
-              href={`/catalog/${product.category.slug}`}
-              className="text-xs font-bold tracking-wide text-azure uppercase"
-            >
-              {product.category.name}
-            </Link>
-          ) : null}
-          <h1 className="section-title mt-3">{product.name}</h1>
-          <p className="mt-4 text-base leading-relaxed text-muted">{product.shortDesc}</p>
-          <div className="mt-5">
-            {product.inStock ? (
-              <span className="badge badge-stock">В наличии</span>
-            ) : (
-              <span className="badge bg-pearl text-muted">Под заказ</span>
-            )}
-          </div>
-          <p className="mt-8 text-sm leading-relaxed text-ink/80">{product.description}</p>
+          <div>
+            {product.category ? (
+              <Link
+                href={`/catalog/${product.category.slug}`}
+                className="text-xs font-bold tracking-wide text-azure uppercase"
+              >
+                {product.category.name}
+              </Link>
+            ) : null}
+            <h1 className="section-title mt-3">{product.name}</h1>
+            <p className="mt-4 text-base leading-relaxed text-muted">{product.shortDesc}</p>
 
-          <div className="mt-10 rounded-[1.4rem] border border-[var(--line)] bg-white p-6">
-            <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
-              Заявка на консультацию
-            </h2>
-            <p className="mt-2 mb-5 text-sm text-muted">
-              Подберём комплектацию и расскажем об условиях поставки.
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              {product.inStock ? (
+                <span className="badge badge-stock">В наличии</span>
+              ) : (
+                <span className="badge bg-pearl text-muted">Под заказ</span>
+              )}
+            </div>
+
+            <p className="mt-6 text-3xl font-bold text-navy">
+              {priceLabel || "Цена по запросу"}
             </p>
-            <LeadForm
-              source="product"
-              productId={product.id}
-              productName={product.name}
-              compact
-            />
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <AddToCartButton
+                product={{
+                  id: product.id,
+                  slug: product.slug,
+                  name: product.name,
+                  imageUrl: product.imageUrl,
+                }}
+                label="В корзину"
+              />
+              <BuyOneClick productId={product.id} productName={product.name} />
+              <Link href="/cart" className="btn-outline">
+                Перейти в корзину
+              </Link>
+            </div>
+
+            <div className="mt-10 border-t border-[var(--line)] pt-8">
+              <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
+                Описание
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-ink/80">{product.description}</p>
+            </div>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { CmsContent } from "@/components/CmsContent";
+import { LeadForm } from "@/components/LeadForm";
 
 export const metadata: Metadata = {
   title: "Обучение",
@@ -8,23 +9,24 @@ export const metadata: Metadata = {
 export default function TrainingPage() {
   return (
     <div className="section-pad">
-      <div className="container-shell max-w-3xl">
-        <p className="section-kicker">Обучение</p>
-        <h1 className="section-title mt-3">Обучение аппаратным методикам</h1>
-        <div className="mt-8 space-y-5 text-muted leading-relaxed">
-          <p>
-            При покупке оборудования проводим бесплатное сертифицированное обучение.
-            Специалист освоит методику работы на аппарате и сможет сразу запускать
-            процедуры для клиентов.
-          </p>
-          <p>
-            Обучение помогает быстрее окупить вложения и уверенно предлагать услуги
-            в вашем салоне или клинике.
-          </p>
+      <div className="container-shell grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
+        <div>
+          <p className="section-kicker">Обучение</p>
+          <CmsContent
+            slug="training"
+            fallbackTitle="Обучение аппаратным методикам"
+            fallbackHtml="<p>При покупке оборудования проводим бесплатное сертифицированное обучение.</p>"
+          />
         </div>
-        <Link href="/#consult" className="btn-primary mt-8 inline-flex">
-          Записаться на консультацию
-        </Link>
+        <div className="h-fit rounded-[1.4rem] border border-[var(--line)] bg-white p-6">
+          <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
+            Записаться на консультацию
+          </h2>
+          <p className="mt-2 mb-5 text-sm text-muted">
+            Расскажем про формат обучения под ваш аппарат.
+          </p>
+          <LeadForm source="training" compact />
+        </div>
       </div>
     </div>
   );
