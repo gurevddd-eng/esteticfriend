@@ -504,6 +504,14 @@ a {
   }
 }
 
+.mobile-nav[open] > summary .mobile-nav__icon {
+  display: none;
+}
+
+.mobile-nav[open] > summary .mobile-nav__close {
+  display: inline;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;

@@ -1,16 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CallbackModal } from "@/components/CallbackModal";
 import { useCart } from "@/components/CartProvider";
 import { NAV_LINKS, SITE, type CategoryDTO } from "@/lib/content";
 
 export function Header({ categories }: { categories: CategoryDTO[] }) {
-  const [open, setOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [callbackOpen, setCallbackOpen] = useState(false);
+  const menuRef = useRef<HTMLDetailsElement>(null);
   const { count } = useCart();
+
+  useEffect(() => {
+    const node = menuRef.current;
+    if (!node) return;
+
+    const close = () => {
+      node.open = false;
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!node.open) return;
+      if (event.target instanceof Node && node.contains(event.target)) return;
+      close();
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, []);
+
+  const closeMenu = () => {
+    if (menuRef.current) menuRef.current.open = false;
+  };
 
   return (
     <>
@@ -102,65 +124,69 @@ export function Header({ categories }: { categories: CategoryDTO[] }) {
                 </span>
               ) : null}
             </Link>
-            <button
-              type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line)] bg-white lg:hidden"
-              aria-label="Меню"
-              onClick={() => setOpen((v) => !v)}
-            >
-              <span className="text-lg leading-none">{open ? "×" : "≡"}</span>
-            </button>
+
+            <details ref={menuRef} className="mobile-nav relative lg:hidden">
+              <summary
+                className="inline-flex h-10 w-10 list-none items-center justify-center rounded-full border border-[var(--line)] bg-white text-navy [&::-webkit-details-marker]:hidden"
+                aria-label="Меню"
+              >
+                <span className="mobile-nav__icon text-lg leading-none" aria-hidden>
+                  ≡
+                </span>
+                <span className="mobile-nav__close hidden text-lg leading-none" aria-hidden>
+                  ×
+                </span>
+              </summary>
+
+              <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[min(22rem,calc(100vw-1.5rem))] rounded-2xl border border-[var(--line)] bg-white shadow-[0_24px_60px_rgba(20,17,22,0.16)]">
+                <div className="flex flex-col gap-1 p-3">
+                  {NAV_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="rounded-xl px-3 py-3 text-sm font-semibold text-navy"
+                      onClick={closeMenu}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  <div className="mt-1 grid grid-cols-2 gap-1 border-t border-[var(--line)] pt-3">
+                    {categories.map((category) => (
+                      <Link
+                        key={category.id}
+                        href={`/catalog/${category.slug}`}
+                        className="rounded-lg px-2 py-2 text-xs font-medium text-muted"
+                        onClick={closeMenu}
+                      >
+                        {category.name}
+                      </Link>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="mt-1 rounded-xl px-3 py-3 text-left text-sm font-semibold text-navy"
+                    onClick={() => {
+                      closeMenu();
+                      setCallbackOpen(true);
+                    }}
+                  >
+                    Обратный звонок
+                  </button>
+                  <Link
+                    href="/cart"
+                    className="rounded-xl px-3 py-3 text-sm font-semibold text-navy"
+                    onClick={closeMenu}
+                  >
+                    Корзина{count > 0 ? ` (${count})` : ""}
+                  </Link>
+                  <a href={SITE.phoneHref} className="mt-1 px-3 pb-1 text-sm font-bold text-azure">
+                    {SITE.phone}
+                  </a>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
-
-        {open ? (
-          <div className="border-t border-[var(--line)] bg-white lg:hidden">
-            <div className="container-shell flex flex-col gap-1 py-4">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="rounded-xl px-3 py-3 text-sm font-semibold text-navy"
-                  onClick={() => setOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <div className="mt-2 grid grid-cols-2 gap-1 border-t border-[var(--line)] pt-3">
-                {categories.map((category) => (
-                  <Link
-                    key={category.id}
-                    href={`/catalog/${category.slug}`}
-                    className="rounded-lg px-2 py-2 text-xs font-medium text-muted"
-                    onClick={() => setOpen(false)}
-                  >
-                    {category.name}
-                  </Link>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="mt-2 rounded-xl px-3 py-3 text-left text-sm font-semibold text-navy"
-                onClick={() => {
-                  setOpen(false);
-                  setCallbackOpen(true);
-                }}
-              >
-                Обратный звонок
-              </button>
-              <Link
-                href="/cart"
-                className="rounded-xl px-3 py-3 text-sm font-semibold text-navy"
-                onClick={() => setOpen(false)}
-              >
-                Корзина{count > 0 ? ` (${count})` : ""}
-              </Link>
-              <a href={SITE.phoneHref} className="mt-2 px-3 text-sm font-bold text-azure">
-                {SITE.phone}
-              </a>
-            </div>
-          </div>
-        ) : null}
       </header>
       <CallbackModal open={callbackOpen} onClose={() => setCallbackOpen(false)} />
     </>
