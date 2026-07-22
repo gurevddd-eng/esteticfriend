@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { CallbackModal } from "@/components/CallbackModal";
 import { useCart } from "@/components/CartProvider";
 import { IconBag, IconClose, IconMenu, IconPhone } from "@/components/icons";
@@ -10,30 +10,27 @@ import { NAV_LINKS, SITE, type CategoryDTO } from "@/lib/content";
 export function Header({ categories }: { categories: CategoryDTO[] }) {
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [callbackOpen, setCallbackOpen] = useState(false);
-  const menuRef = useRef<HTMLDetailsElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { count } = useCart();
 
   useEffect(() => {
-    const node = menuRef.current;
-    if (!node) return;
+    if (!menuOpen) return;
 
-    const close = () => {
-      node.open = false;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
     };
 
-    const onPointerDown = (event: PointerEvent) => {
-      if (!node.open) return;
-      if (event.target instanceof Node && node.contains(event.target)) return;
-      close();
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener("keydown", onKeyDown);
     };
+  }, [menuOpen]);
 
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, []);
-
-  const closeMenu = () => {
-    if (menuRef.current) menuRef.current.open = false;
-  };
+  const closeMenu = () => setMenuOpen(false);
 
   return (
     <>
@@ -114,65 +111,102 @@ export function Header({ categories }: { categories: CategoryDTO[] }) {
               ) : null}
             </Link>
 
-            <details ref={menuRef} className="mobile-nav relative lg:hidden">
-              <summary
-                className="inline-flex h-10 w-10 shrink-0 list-none items-center justify-center rounded-full border border-[var(--line)] bg-white text-navy [&::-webkit-details-marker]:hidden"
-                aria-label="Меню"
-              >
-                <IconMenu className="mobile-nav__icon block" />
-                <IconClose className="mobile-nav__close hidden" />
-              </summary>
-
-              <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[min(22rem,calc(100vw-1.5rem))] rounded-2xl border border-[var(--line)] bg-white shadow-[0_24px_60px_rgba(20,17,22,0.16)]">
-                <div className="flex flex-col gap-1 p-3">
-                  {NAV_LINKS.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="rounded-xl px-3 py-3 text-sm font-semibold text-navy"
-                      onClick={closeMenu}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                  <div className="mt-1 grid grid-cols-2 gap-1 border-t border-[var(--line)] pt-3">
-                    {categories.map((category) => (
-                      <Link
-                        key={category.id}
-                        href={`/catalog/${category.slug}`}
-                        className="rounded-lg px-2 py-2 text-xs font-medium text-muted"
-                        onClick={closeMenu}
-                      >
-                        {category.name}
-                      </Link>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    className="mt-1 rounded-xl px-3 py-3 text-left text-sm font-semibold text-navy"
-                    onClick={() => {
-                      closeMenu();
-                      setCallbackOpen(true);
-                    }}
-                  >
-                    Обратный звонок
-                  </button>
-                  <Link
-                    href="/cart"
-                    className="rounded-xl px-3 py-3 text-sm font-semibold text-navy"
-                    onClick={closeMenu}
-                  >
-                    Корзина{count > 0 ? ` (${count})` : ""}
-                  </Link>
-                  <a href={SITE.phoneHref} className="mt-1 px-3 pb-1 text-sm font-bold text-azure">
-                    {SITE.phone}
-                  </a>
-                </div>
-              </div>
-            </details>
+            <button
+              type="button"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-white text-navy transition hover:border-azure/40 lg:hidden"
+              aria-label="Меню"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-side-menu"
+              onClick={() => setMenuOpen(true)}
+            >
+              <IconMenu />
+            </button>
           </div>
         </div>
       </header>
+
+      <div
+        className={`mobile-drawer lg:hidden ${menuOpen ? "is-open" : ""}`}
+        aria-hidden={!menuOpen}
+      >
+        <button
+          type="button"
+          className="mobile-drawer__backdrop"
+          aria-label="Закрыть меню"
+          tabIndex={menuOpen ? 0 : -1}
+          onClick={closeMenu}
+        />
+        <aside
+          id="mobile-side-menu"
+          className="mobile-drawer__panel"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Меню сайта"
+        >
+          <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
+            <p className="brand-mark text-sm text-navy">{SITE.name}</p>
+            <button
+              type="button"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--line)] bg-white text-navy"
+              aria-label="Закрыть меню"
+              onClick={closeMenu}
+            >
+              <IconClose />
+            </button>
+          </div>
+
+          <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="rounded-xl px-3 py-3 text-base font-semibold text-navy transition hover:bg-pearl"
+                onClick={closeMenu}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="mt-3 border-t border-[var(--line)] pt-4">
+              <p className="px-3 pb-2 text-xs font-bold tracking-wide text-muted uppercase">
+                Каталог
+              </p>
+              <div className="grid grid-cols-1 gap-0.5">
+                {categories.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={`/catalog/${category.slug}`}
+                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink/80 transition hover:bg-accent-soft hover:text-azure"
+                    onClick={closeMenu}
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </nav>
+
+          <div className="mt-auto space-y-2 border-t border-[var(--line)] px-5 py-4">
+            <button
+              type="button"
+              className="btn-primary w-full"
+              onClick={() => {
+                closeMenu();
+                setCallbackOpen(true);
+              }}
+            >
+              Обратный звонок
+            </button>
+            <Link href="/cart" className="btn-outline w-full" onClick={closeMenu}>
+              Корзина{count > 0 ? ` (${count})` : ""}
+            </Link>
+            <a href={SITE.phoneHref} className="block pt-1 text-center text-sm font-bold text-azure">
+              {SITE.phone}
+            </a>
+          </div>
+        </aside>
+      </div>
+
       <CallbackModal open={callbackOpen} onClose={() => setCallbackOpen(false)} />
     </>
   );
