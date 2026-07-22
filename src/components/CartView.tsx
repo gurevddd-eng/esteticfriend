@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useCart } from "@/components/CartProvider";
+import { QuantityStepper } from "@/components/QuantityStepper";
 
 export function CartView() {
   const { items, ready, setQuantity, removeItem, clear, count } = useCart();
@@ -120,33 +121,13 @@ export function CartView() {
                 {item.name}
               </Link>
               <div className="mt-3 flex flex-wrap items-center gap-4">
-                <div
-                  className="inline-flex items-center rounded-full border border-[var(--line)] bg-pearl/60"
-                  role="group"
-                  aria-label={`Количество: ${item.name}`}
-                >
-                  <button
-                    type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-full text-lg font-semibold text-navy transition hover:bg-white disabled:opacity-40"
-                    aria-label="Уменьшить количество"
-                    disabled={item.quantity <= 1}
-                    onClick={() => setQuantity(item.productId, item.quantity - 1)}
-                  >
-                    −
-                  </button>
-                  <span className="min-w-8 text-center text-sm font-bold tabular-nums text-navy">
-                    {item.quantity}
-                  </span>
-                  <button
-                    type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-full text-lg font-semibold text-navy transition hover:bg-white disabled:opacity-40"
-                    aria-label="Увеличить количество"
-                    disabled={item.quantity >= 99}
-                    onClick={() => setQuantity(item.productId, item.quantity + 1)}
-                  >
-                    +
-                  </button>
-                </div>
+                <QuantityStepper
+                  quantity={item.quantity}
+                  label={`Количество: ${item.name}`}
+                  disableAtOne
+                  onDecrease={() => setQuantity(item.productId, item.quantity - 1)}
+                  onIncrease={() => setQuantity(item.productId, item.quantity + 1)}
+                />
                 <button
                   type="button"
                   className="text-sm font-semibold text-muted transition hover:text-azure"

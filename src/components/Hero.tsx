@@ -11,7 +11,7 @@ export function Hero() {
           <p className="brand-mark animate-rise text-sm text-frost/90 md:text-base">
             {SITE.name}
           </p>
-          <h1 className="animate-rise-delay mt-5 font-[family-name:var(--font-syne)] leading-[1.05] font-bold tracking-[-0.03em] text-white">
+          <h1 className="animate-rise-delay mt-5 font-[family-name:var(--font-syne)] leading-[1.08] font-bold text-white">
             Косметологические аппараты для салонов красоты
           </h1>
           <p className="animate-rise-delay-2 mt-5 max-w-xl text-base leading-relaxed text-white/75 md:text-lg">
