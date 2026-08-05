@@ -1,19 +1,19 @@
-﻿/* ESTETIC FRIEND — Admin CMS · крем-брюле / карамель */
+﻿/* ESTETIC FRIEND — Admin CMS · джинса + лайм */
 
 :root {
-  --cms-cream: #fff2e0;
-  --cms-caramel: #a57149;
-  --cms-ink: #5a3d2b;
-  --cms-muted: #8b6b52;
-  --cms-line: rgba(165, 113, 73, 0.22);
-  --cms-surface: #fff2e0;
-  --cms-panel: #fffaf3;
-  --cms-rail: #a57149;
-  --cms-rail-deep: #8f5f3c;
-  --cms-rail-soft: rgba(255, 242, 224, 0.14);
-  --cms-accent: #a57149;
-  --cms-lime: #fff2e0;
-  --cms-bg: #f5e6d4;
+  --cms-cream: #ffffff;
+  --cms-caramel: #354459;
+  --cms-ink: #000000;
+  --cms-muted: #4a4a4a;
+  --cms-line: rgba(53, 68, 89, 0.14);
+  --cms-surface: #ffffff;
+  --cms-panel: #ffffff;
+  --cms-rail: #354459;
+  --cms-rail-deep: #2a3646;
+  --cms-rail-soft: rgba(224, 239, 136, 0.12);
+  --cms-accent: #354459;
+  --cms-lime: #e0ef88;
+  --cms-bg: #f4f4f2;
   --cms-sidebar: 15.5rem;
 }
 
@@ -21,13 +21,13 @@
 .admin-shell {
   min-height: 100vh;
   font-family: var(--font-manrope), system-ui, sans-serif;
-  color: var(--cms-ink);
+  color: #000000;
 }
 
 .admin-auth {
   background:
-    radial-gradient(ellipse 70% 50% at 0% 0%, color-mix(in srgb, var(--cms-cream) 80%, white), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 100%, color-mix(in srgb, var(--cms-caramel) 18%, transparent), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 0% 0%, rgba(224, 239, 136, 0.35), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, rgba(53, 68, 89, 0.08), transparent 50%),
     var(--cms-bg);
 }
 
@@ -52,7 +52,7 @@
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(165, 113, 73, 0.4);
+  background: rgba(53, 68, 89, 0.45);
   backdrop-filter: blur(2px);
 }
 
@@ -71,8 +71,8 @@
   width: min(var(--cms-sidebar), 90vw);
   height: 100vh;
   flex-direction: column;
-  background: var(--cms-rail);
-  color: var(--cms-cream);
+  background: linear-gradient(165deg, #3d5068 0%, var(--cms-rail) 45%, var(--cms-rail-deep) 100%);
+  color: #ffffff;
   transform: translateX(-104%);
   transition: transform 0.25s ease;
 }
@@ -111,8 +111,8 @@
   width: 2.15rem;
   height: 2.15rem;
   border-radius: 0.55rem;
-  background: var(--cms-cream);
-  color: var(--cms-caramel);
+  background: var(--cms-lime);
+  color: var(--cms-rail);
   font-family: var(--font-syne), sans-serif;
   font-size: 0.7rem;
   font-weight: 700;
@@ -200,8 +200,9 @@
 }
 
 .admin-nav-link.is-active {
-  background: var(--cms-cream);
-  color: var(--cms-caramel);
+  background: var(--cms-lime);
+  color: #000000;
+  font-weight: 700;
 }
 
 .admin-sidebar__foot {
@@ -525,8 +526,8 @@
 
 .admin-chip--ghost {
   background: transparent;
-  border: 1px solid rgba(255, 242, 224, 0.28);
-  color: #fff2e0;
+  border: 1px solid rgba(53, 68, 89, 0.2);
+  color: var(--cms-ink);
 }
 
 .admin-media-card .admin-chip--ghost {
@@ -542,8 +543,8 @@
   border-radius: 1.15rem;
   border: 1px solid var(--cms-line);
   background:
-    linear-gradient(125deg, var(--cms-rail-deep) 0%, var(--cms-caramel) 55%, color-mix(in srgb, var(--cms-caramel) 75%, #fff2e0) 100%);
-  color: #fff2e0;
+    linear-gradient(125deg, var(--cms-rail-deep) 0%, var(--cms-caramel) 55%, color-mix(in srgb, var(--cms-caramel) 75%, #2a3646) 100%);
+  color: #ffffff;
 }
 
 @media (min-width: 800px) {
@@ -585,13 +586,13 @@
 }
 
 .admin-welcome__actions .btn-primary {
-  background: var(--cms-cream);
-  color: var(--cms-caramel);
+  background: var(--cms-lime);
+  color: #000000;
 }
 
 .admin-welcome__actions .btn-outline {
-  border-color: rgba(255, 242, 224, 0.28);
-  color: #fff2e0;
+  border-color: rgba(224, 239, 136, 0.35);
+  color: var(--cms-lime);
 }
 
 .admin-kpi-row {
@@ -660,7 +661,7 @@
 .admin-kpi--hot {
   background: var(--cms-rail);
   border-color: transparent;
-  color: #fff2e0;
+  color: #ffffff;
 }
 
 .admin-kpi--hot .admin-kpi__label {
@@ -818,7 +819,7 @@
 .admin-bars__fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--cms-caramel), color-mix(in srgb, var(--cms-caramel) 70%, #5a3d2b));
+  background: linear-gradient(90deg, var(--cms-caramel), color-mix(in srgb, var(--cms-caramel) 70%, #354459));
   transition: width 0.35s ease;
 }
 
@@ -1382,7 +1383,7 @@
   place-items: center;
   min-height: 14rem;
   border-radius: 1rem;
-  border: 1.5px dashed rgba(165, 113, 73, 0.35);
+  border: 1.5px dashed rgba(53, 68, 89, 0.35);
   background: color-mix(in srgb, var(--cms-bg) 45%, white);
   overflow: hidden;
 }
@@ -1416,7 +1417,7 @@
   gap: 0.75rem;
   padding: 1.1rem;
   border-radius: var(--cms-radius, 1.25rem);
-  border: 1px solid rgba(165, 113, 73, 0.14);
+  border: 1px solid rgba(53, 68, 89, 0.14);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 30%),
     var(--cms-panel);
@@ -1429,7 +1430,7 @@
   padding: 0.85rem;
   border-radius: 1rem;
   background: white;
-  border: 1px solid rgba(165, 113, 73, 0.12);
+  border: 1px solid rgba(53, 68, 89, 0.12);
 }
 
 .admin-product-preview__media {
@@ -1529,7 +1530,7 @@
   width: 100%;
   padding: 0.7rem 0.8rem;
   border-radius: 0.85rem;
-  border: 1px solid rgba(165, 113, 73, 0.16);
+  border: 1px solid rgba(53, 68, 89, 0.16);
   background: color-mix(in srgb, var(--cms-bg) 45%, white);
   text-align: left;
   cursor: pointer;
@@ -1538,7 +1539,7 @@
 
 .admin-flag-toggle.is-on {
   background: color-mix(in srgb, var(--cms-cream) 55%, white);
-  border-color: rgba(165, 113, 73, 0.35);
+  border-color: rgba(53, 68, 89, 0.35);
 }
 
 .admin-flag-toggle__label {
@@ -1558,7 +1559,7 @@
   width: 2.4rem;
   height: 1.3rem;
   border-radius: 999px;
-  background: rgba(165, 113, 73, 0.2);
+  background: rgba(53, 68, 89, 0.2);
   position: relative;
 }
 
@@ -1588,7 +1589,7 @@
   gap: 0.5rem;
   padding: 0.85rem;
   border-radius: 1rem;
-  border: 1px solid rgba(165, 113, 73, 0.14);
+  border: 1px solid rgba(53, 68, 89, 0.14);
   background: rgba(255, 247, 236, 0.92);
   backdrop-filter: blur(12px);
   box-shadow: 0 12px 30px rgba(79, 50, 32, 0.08);
@@ -1726,8 +1727,8 @@
   border-radius: 1.1rem;
   border: 1px solid var(--cms-line);
   background:
-    linear-gradient(140deg, var(--cms-rail-deep), var(--cms-caramel) 60%, color-mix(in srgb, var(--cms-caramel) 80%, #5a3d2b));
-  color: #fff2e0;
+    linear-gradient(140deg, var(--cms-rail-deep), var(--cms-caramel) 60%, color-mix(in srgb, var(--cms-caramel) 80%, #354459));
+  color: #ffffff;
 }
 
 .admin-hero-preview__meta {
@@ -1830,7 +1831,7 @@
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(165, 113, 73, 0.45);
+  background: rgba(53, 68, 89, 0.45);
   backdrop-filter: blur(3px);
   cursor: pointer;
 }
@@ -1844,13 +1845,13 @@
   border-radius: 1.15rem 1.15rem 0 0;
   background: var(--cms-cream);
   color: var(--cms-ink);
-  box-shadow: 0 -10px 40px rgba(165, 113, 73, 0.16);
+  box-shadow: 0 -10px 40px rgba(53, 68, 89, 0.16);
 }
 
 @media (min-width: 720px) {
   .admin-modal__dialog {
     border-radius: 1.15rem;
-    box-shadow: 0 22px 55px rgba(165, 113, 73, 0.18);
+    box-shadow: 0 22px 55px rgba(53, 68, 89, 0.18);
   }
 }
 
@@ -1943,9 +1944,9 @@
   justify-content: space-between;
   padding: clamp(2rem, 5vw, 3.25rem);
   background:
-    linear-gradient(165deg, var(--cms-rail-deep), var(--cms-caramel) 50%, color-mix(in srgb, var(--cms-caramel) 78%, #5a3d2b)),
+    linear-gradient(165deg, var(--cms-rail-deep), var(--cms-caramel) 50%, color-mix(in srgb, var(--cms-caramel) 78%, #354459)),
     radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--cms-lime) 24%, transparent), transparent 42%);
-  color: #fff2e0;
+  color: #ffffff;
 }
 
 @media (min-width: 900px) {
@@ -1960,7 +1961,7 @@
   width: 2.85rem;
   height: 2.85rem;
   border-radius: 0.75rem;
-  background: var(--cms-cream);
+  background: var(--cms-lime);
   color: var(--cms-caramel);
   font-family: var(--font-syne), sans-serif;
   font-weight: 700;
@@ -2133,7 +2134,7 @@
   gap: 0.95rem;
   padding: 1.15rem 1.2rem 1.25rem;
   border-radius: var(--cms-radius, 1.25rem);
-  border: 1px solid rgba(165, 113, 73, 0.14);
+  border: 1px solid rgba(53, 68, 89, 0.14);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 28%),
     var(--cms-panel);
@@ -2146,7 +2147,7 @@
 
 .admin-settings-card__head {
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(165, 113, 73, 0.1);
+  border-bottom: 1px solid rgba(53, 68, 89, 0.1);
 }
 
 .admin-settings-card__eyebrow {
@@ -2182,7 +2183,7 @@
   bottom: 0.75rem;
   padding: 0.85rem;
   border-radius: 1rem;
-  border: 1px solid rgba(165, 113, 73, 0.14);
+  border: 1px solid rgba(53, 68, 89, 0.14);
   background: rgba(255, 247, 236, 0.88);
   backdrop-filter: blur(12px);
   box-shadow: 0 12px 30px rgba(79, 50, 32, 0.08);
@@ -2331,7 +2332,7 @@
   gap: 0.7rem;
   padding: 0.95rem;
   border-radius: 1rem;
-  border: 1px solid rgba(165, 113, 73, 0.14);
+  border: 1px solid rgba(53, 68, 89, 0.14);
   background: color-mix(in srgb, var(--cms-bg) 40%, white);
 }
 
@@ -2349,7 +2350,7 @@
   place-items: center;
   border-radius: 0.85rem;
   background: white;
-  border: 1px solid rgba(165, 113, 73, 0.12);
+  border: 1px solid rgba(53, 68, 89, 0.12);
   overflow: hidden;
 }
 
@@ -2442,7 +2443,7 @@
   gap: 0.7rem;
   padding: 1.05rem 1.1rem 1.1rem;
   border-radius: var(--cms-radius, 1.25rem);
-  border: 1px solid rgba(165, 113, 73, 0.14);
+  border: 1px solid rgba(53, 68, 89, 0.14);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 28%),
     var(--cms-panel);
@@ -2492,7 +2493,7 @@
   gap: 0.45rem;
   margin-top: 0.15rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(165, 113, 73, 0.1);
+  border-top: 1px solid rgba(53, 68, 89, 0.1);
 }
 
 .admin-page-card__actions-row {
@@ -2533,19 +2534,19 @@
 }
 
 .admin-page-card__btn--ghost {
-  border-color: rgba(165, 113, 73, 0.2);
+  border-color: rgba(53, 68, 89, 0.2);
   background: rgba(255, 255, 255, 0.75);
   color: var(--cms-ink);
 }
 
 .admin-page-card__btn--ghost:hover {
-  border-color: rgba(165, 113, 73, 0.4);
+  border-color: rgba(53, 68, 89, 0.4);
   background: white;
   color: var(--cms-caramel);
 }
 
 .admin-page-card__btn--danger {
-  border-color: rgba(165, 113, 73, 0.16);
+  border-color: rgba(53, 68, 89, 0.16);
   background: color-mix(in srgb, var(--cms-bg) 55%, white);
   color: #8a4a38;
 }
@@ -2572,7 +2573,7 @@
   min-height: 2rem;
   padding: 0.35rem 0.8rem;
   border-radius: 999px;
-  border: 1px solid rgba(165, 113, 73, 0.18);
+  border: 1px solid rgba(53, 68, 89, 0.18);
   background: rgba(255, 255, 255, 0.65);
   color: var(--cms-muted);
   font-size: 0.78rem;
@@ -2602,7 +2603,7 @@
 .admin-page-editor__preview {
   padding: 1.15rem;
   border-radius: 1rem;
-  border: 1px solid rgba(165, 113, 73, 0.14);
+  border: 1px solid rgba(53, 68, 89, 0.14);
   background: white;
 }
 

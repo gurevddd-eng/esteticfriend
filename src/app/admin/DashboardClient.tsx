@@ -9,12 +9,12 @@ import {
   type NamedCount,
 } from "@/lib/admin-dashboard";
 
-const CARAMEL = "#a57149";
-const CREAM = "#fff2e0";
-const INK = "#5a3d2b";
-const MUTED = "#8b6b52";
-const LINE = "rgba(165, 113, 73, 0.22)";
-const SOFT = "#f5e6d4";
+const NAVY = "#354459";
+const LIME = "#e0ef88";
+const INK = "#000000";
+const MUTED = "#4a4a4a";
+const LINE = "rgba(53, 68, 89, 0.22)";
+const SOFT = "#f4f4f2";
 
 function AreaChart({ points }: { points: DayPoint[] }) {
   const [hover, setHover] = useState<number | null>(null);
@@ -72,15 +72,15 @@ function AreaChart({ points }: { points: DayPoint[] }) {
           );
         })}
         <path d={area} fill="url(#leadFill)" opacity={0.9} />
-        <path d={line} fill="none" stroke={CARAMEL} strokeWidth={2.5} strokeLinejoin="round" />
+        <path d={line} fill="none" stroke={NAVY} strokeWidth={2.5} strokeLinejoin="round" />
         {coords.map((c, i) => (
           <g key={c.date}>
             <circle
               cx={c.x}
               cy={c.y}
               r={hover === i ? 5.5 : 3.5}
-              fill={hover === i ? INK : CARAMEL}
-              stroke={CREAM}
+              fill={hover === i ? INK : NAVY}
+              stroke={LIME}
               strokeWidth={2}
               onMouseEnter={() => setHover(i)}
               style={{ cursor: "pointer" }}
@@ -97,8 +97,8 @@ function AreaChart({ points }: { points: DayPoint[] }) {
         ))}
         <defs>
           <linearGradient id="leadFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={CARAMEL} stopOpacity="0.35" />
-            <stop offset="100%" stopColor={CARAMEL} stopOpacity="0.02" />
+            <stop offset="0%" stopColor={NAVY} stopOpacity="0.35" />
+            <stop offset="100%" stopColor={NAVY} stopOpacity="0.02" />
           </linearGradient>
         </defs>
       </svg>
@@ -165,7 +165,7 @@ function DonutChart({
   eyebrow: string;
 }) {
   const total = items.reduce((s, i) => s + i.count, 0) || 1;
-  const colors = [CARAMEL, INK, "#c4926a", SOFT];
+  const colors = [NAVY, INK, LIME, SOFT];
   const r = 54;
   const c = 2 * Math.PI * r;
   let offset = 0;

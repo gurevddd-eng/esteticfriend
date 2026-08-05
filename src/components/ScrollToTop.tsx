@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { isScrollRestoring } from "@/hooks/useBodyScrollLock";
 
 export function ScrollToTop() {
   const [visible, setVisible] = useState(false);
@@ -24,6 +25,8 @@ export function ScrollToTop() {
     };
 
     const onScroll = () => {
+      if (document.body.dataset.scrollLocked === "true" || isScrollRestoring()) return;
+
       const y = window.scrollY;
       const goingUp = y < lastY - 1;
       lastY = y;

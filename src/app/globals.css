@@ -1450,6 +1450,7 @@ a {
 
 body[data-scroll-locked="true"] {
   overscroll-behavior: none;
+  position: relative;
 }
 
 .mobile-drawer {

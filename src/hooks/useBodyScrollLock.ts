@@ -3,20 +3,18 @@
 import { useEffect } from "react";
 
 let lockCount = 0;
-let savedScrollY = 0;
 
+/**
+ * Lock background scroll without position:fixed (avoids jump on unlock).
+ * The overlay itself should be position:fixed; body only gets overflow:hidden.
+ */
 function applyLock() {
   const { body, documentElement } = document;
   if (lockCount === 0) {
-    savedScrollY = window.scrollY;
     body.dataset.scrollLocked = "true";
     body.style.overflow = "hidden";
     documentElement.style.overflow = "hidden";
-    body.style.position = "fixed";
-    body.style.top = `-${savedScrollY}px`;
-    body.style.left = "0";
-    body.style.right = "0";
-    body.style.width = "100%";
+    body.style.touchAction = "none";
   }
   lockCount += 1;
 }
@@ -28,13 +26,8 @@ function releaseLock() {
   const { body, documentElement } = document;
   body.style.overflow = "";
   documentElement.style.overflow = "";
-  body.style.position = "";
-  body.style.top = "";
-  body.style.left = "";
-  body.style.right = "";
-  body.style.width = "";
+  body.style.touchAction = "";
   delete body.dataset.scrollLocked;
-  window.scrollTo(0, savedScrollY);
 }
 
 /** Locks page scroll while `locked` is true. Supports nested overlays. */
@@ -44,4 +37,9 @@ export function useBodyScrollLock(locked: boolean) {
     applyLock();
     return () => releaseLock();
   }, [locked]);
+}
+
+/** @deprecated No-op — kept so ScrollToTop import does not break. */
+export function isScrollRestoring() {
+  return false;
 }

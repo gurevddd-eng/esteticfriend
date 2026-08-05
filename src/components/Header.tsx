@@ -34,6 +34,7 @@ export function Header({
   const { count: compareCount } = useCompare();
   const catalogPanelId = useId();
   const catalogWrapRef = useRef<HTMLDivElement>(null);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const catalogCategories = categories.filter((c) => c.slug !== "novinki");
@@ -56,7 +57,10 @@ export function Header({
     setCatalogOpen(false);
   };
 
-  const closeMenu = () => setMenuOpen(false);
+  const closeMenu = () => {
+    menuBtnRef.current?.focus({ preventScroll: true });
+    setMenuOpen(false);
+  };
 
   useEffect(() => {
     if (!menuOpen && !catalogOpen) return;
@@ -207,6 +211,7 @@ export function Header({
               ) : null}
             </Link>
             <button
+              ref={menuBtnRef}
               type="button"
               className="site-header__icon site-header__menu-btn"
               aria-label="Меню"
@@ -237,6 +242,7 @@ export function Header({
           role="dialog"
           aria-modal="true"
           aria-label="Меню сайта"
+          inert={!menuOpen ? true : undefined}
         >
           <div className="mobile-drawer__head">
             <div>
