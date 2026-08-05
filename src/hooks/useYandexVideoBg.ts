@@ -103,13 +103,6 @@ export function useYandexVideoBg(sources: Sources) {
     let framed = false;
     let drawing = false;
 
-    const softPlay = () => {
-      if (cancelled || document.hidden) return;
-      video.muted = true;
-      video.defaultMuted = true;
-      void video.play().catch(() => undefined);
-    };
-
     const drawOnce = () => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d", { alpha: false });
