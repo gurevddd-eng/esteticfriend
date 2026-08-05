@@ -2,11 +2,9 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { loginAdmin } from "@/actions/auth";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -24,16 +22,15 @@ export default function AdminLoginPage() {
       setError(res.error || "Ошибка входа");
       return;
     }
-    router.push("/admin");
-    router.refresh();
+    window.location.assign("/admin");
   }
 
   return (
     <div className="admin-login">
       <aside className="admin-login__aside">
         <div>
-          <span className="admin-login__mark">EF</span>
-          <p className="admin-login__name">ESTETIC FRIEND</p>
+          <span className="admin-login__mark">SV</span>
+          <p className="admin-login__name">SEVENS</p>
           <p className="admin-login__tag">
             CMS для каталога, главной и заявок — в одном спокойном рабочем пространстве.
           </p>

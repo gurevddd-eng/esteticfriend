@@ -44,7 +44,7 @@ export function About({ site }: { site: SiteInfo }) {
           <figure className="about-shelf__item about-shelf__item--center">
             <Image
               src="/about/about-1.webp"
-              alt="Клиенты ESTETIC FRIEND после процедур"
+              alt={`Клиенты ${site.name} после процедур`}
               fill
               sizes="280px"
               className="object-cover"

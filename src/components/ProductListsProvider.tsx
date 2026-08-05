@@ -108,8 +108,8 @@ function createListProvider(storageKey: string, maxItems?: number) {
   return { Provider, useList };
 }
 
-const favoritesApi = createListProvider("esteticfriend_favorites_v1");
-const compareApi = createListProvider("esteticfriend_compare_v1", COMPARE_LIMIT);
+const favoritesApi = createListProvider("sevens_favorites_v1");
+const compareApi = createListProvider("sevens_compare_v1", COMPARE_LIMIT);
 
 export const FavoritesProvider = favoritesApi.Provider;
 export const CompareProvider = compareApi.Provider;

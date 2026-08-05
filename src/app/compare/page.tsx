@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { CompareView } from "@/components/CompareView";
+import { SITE } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Сравнение",
-  description: "Сравнение косметологического оборудования ESTETIC FRIEND",
+  description: `Сравнение косметологического оборудования ${SITE.name}`,
 };
 
 export default function ComparePage() {

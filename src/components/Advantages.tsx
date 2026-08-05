@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { AdvantageDTO } from "@/lib/catalog";
+import { SITE } from "@/lib/content";
 
 export function Advantages({ items }: { items: AdvantageDTO[] }) {
   if (!items.length) return null;
@@ -9,7 +10,7 @@ export function Advantages({ items }: { items: AdvantageDTO[] }) {
       <div className="advantages__head">
         <div>
           <p className="section-kicker">Преимущества компании</p>
-          <h2 className="section-title mt-3">Почему выбирают ESTETIC FRIEND</h2>
+          <h2 className="section-title mt-3">Почему выбирают {SITE.name}</h2>
         </div>
         <p className="advantages__lead">
           Сервис, обучение и условия сотрудничества — всё, что нужно, чтобы оборудование
@@ -20,7 +21,7 @@ export function Advantages({ items }: { items: AdvantageDTO[] }) {
       <div className="advantages__media">
         <Image
           src="/advantages/main.webp"
-          alt="Команда и оборудование ESTETIC FRIEND"
+          alt={`Команда и оборудование ${SITE.name}`}
           fill
           sizes="100vw"
           className="object-cover"

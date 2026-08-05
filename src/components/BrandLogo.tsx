@@ -28,8 +28,7 @@ export function BrandLogo({
   tone?: "light" | "dark";
   logoUrl?: string | null;
 }) {
-  const estetic = tone === "dark" ? "text-white" : "text-navy";
-  const friend = tone === "dark" ? "text-frost" : "text-azure";
+  const textTone = tone === "dark" ? "text-white" : "text-navy";
 
   if (logoUrl) {
     return (
@@ -51,11 +50,10 @@ export function BrandLogo({
   return (
     <Link
       href={href}
-      className={`brand-logo inline-flex shrink-0 items-baseline gap-[0.35em] font-[family-name:var(--font-syne)] tracking-[0.08em] uppercase ${SIZES[size]} ${className}`}
+      className={`brand-logo inline-flex shrink-0 items-baseline font-[family-name:var(--font-syne)] tracking-[0.14em] uppercase ${SIZES[size]} ${className}`}
       aria-label={SITE.name}
     >
-      <span className={estetic}>Estetic</span>
-      <span className={`${friend} italic`}>Friend</span>
+      <span className={textTone}>{SITE.name}</span>
     </Link>
   );
 }

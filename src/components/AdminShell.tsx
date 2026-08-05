@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { logoutAdmin } from "@/actions/auth";
 import { AdminNavIcon } from "@/components/AdminNavIcons";
 import { IconClose, IconMenu } from "@/components/icons";
@@ -23,6 +23,7 @@ export function AdminShell({
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [now, setNow] = useState(() => new Date());
+  const [logoutPending, startLogout] = useTransition();
 
   useBodyScrollLock(drawerOpen);
 
@@ -50,6 +51,13 @@ export function AdminShell({
     [now],
   );
 
+  function onLogout() {
+    startLogout(async () => {
+      await logoutAdmin();
+      window.location.assign("/admin/login");
+    });
+  }
+
   return (
     <div className="admin-shell">
       <div className="admin-shell__glow" aria-hidden />
@@ -63,10 +71,10 @@ export function AdminShell({
         <div className="admin-sidebar__texture" aria-hidden />
         <div className="admin-sidebar__brand">
           <Link href="/admin" className="admin-sidebar__logo">
-            <span className="admin-sidebar__mark">EF</span>
+            <span className="admin-sidebar__mark">SV</span>
             <span className="admin-sidebar__brand-text">
-              <span className="admin-sidebar__name">ESTETIC</span>
-              <span className="admin-sidebar__sub">Friend CMS</span>
+              <span className="admin-sidebar__name">SEVENS</span>
+              <span className="admin-sidebar__sub">CMS</span>
             </span>
           </Link>
           <button
@@ -125,11 +133,14 @@ export function AdminShell({
             <Link href="/" className="admin-sidebar__ghost" target="_blank">
               Сайт
             </Link>
-            <form action={logoutAdmin} className="admin-sidebar__logout-form">
-              <button type="submit" className="admin-sidebar__logout">
-                Выйти
-              </button>
-            </form>
+            <button
+              type="button"
+              className="admin-sidebar__logout"
+              disabled={logoutPending}
+              onClick={onLogout}
+            >
+              {logoutPending ? "Выход..." : "Выйти"}
+            </button>
           </div>
         </div>
       </aside>

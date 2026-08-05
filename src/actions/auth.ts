@@ -1,9 +1,13 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { getAdminSession } from "@/lib/session";
+import {
+  clearLegacyAdminSessionCookies,
+  destroyAdminSession,
+  getAdminSession,
+} from "@/lib/session";
 
 export type AuthResult = { ok: boolean; error?: string };
 
@@ -18,6 +22,8 @@ export async function loginAdmin(input: {
   const valid = await bcrypt.compare(input.password, admin.passwordHash);
   if (!valid) return { ok: false, error: "Неверный логин или пароль" };
 
+  await clearLegacyAdminSessionCookies();
+
   const session = await getAdminSession();
   session.isLoggedIn = true;
   session.adminId = admin.id;
@@ -25,11 +31,12 @@ export async function loginAdmin(input: {
   session.name = admin.name || undefined;
   await session.save();
 
+  revalidatePath("/admin", "layout");
   return { ok: true };
 }
 
-export async function logoutAdmin() {
-  const session = await getAdminSession();
-  session.destroy();
-  redirect("/admin/login");
+export async function logoutAdmin(): Promise<AuthResult> {
+  await destroyAdminSession();
+  revalidatePath("/admin", "layout");
+  return { ok: true };
 }

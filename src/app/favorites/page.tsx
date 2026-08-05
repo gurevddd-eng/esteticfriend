@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { FavoritesView } from "@/components/FavoritesView";
+import { SITE } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Избранное",
-  description: "Сохранённые аппараты ESTETIC FRIEND",
+  description: `Сохранённые аппараты ${SITE.name}`,
 };
 
 export default function FavoritesPage() {

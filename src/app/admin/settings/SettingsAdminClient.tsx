@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveSiteSettings, uploadBrandAsset } from "@/actions/admin";
+import { SITE } from "@/lib/content";
 
 type SiteDefaults = {
   phone: string;
@@ -145,9 +146,7 @@ export function SettingsAdminClient({
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={logoUrl} alt="Логотип" />
                   ) : (
-                    <span className="admin-brand-asset__fallback">
-                      Estetic <em>Friend</em>
-                    </span>
+                    <span className="admin-brand-asset__fallback">{SITE.name}</span>
                   )}
                 </div>
                 <label className="admin-field">
@@ -198,10 +197,10 @@ export function SettingsAdminClient({
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={faviconUrl} alt="" />
                     ) : (
-                      "EF"
+                      "SV"
                     )}
                   </span>
-                  <span>ESTETIC FRIEND</span>
+                  <span>{SITE.name}</span>
                 </div>
                 <label className="admin-field">
                   <span>URL favicon</span>
@@ -365,7 +364,7 @@ export function SettingsAdminClient({
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoUrl} alt="" className="admin-settings-preview__logo" />
             ) : (
-              <h2 className="admin-settings-preview__brand">ESTETIC FRIEND</h2>
+              <h2 className="admin-settings-preview__brand">{SITE.name}</h2>
             )}
             <p className="admin-settings-preview__tagline">
               {tagline.trim() || defaults.tagline}

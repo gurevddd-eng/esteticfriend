@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { aggregateLeadProductCounts, getLeadProductNames } from "@/lib/lead-products";
 
 export type DayPoint = { date: string; label: string; count: number };
 
@@ -84,7 +85,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     leadsInRange,
     categoryRows,
     catalogStatus,
-    topProductGroups,
+    leadsForProducts,
   ] = await Promise.all([
     prisma.lead.count(),
     prisma.lead.count({ where: { createdAt: { gte: weekStart } } }),
@@ -126,12 +127,13 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       prisma.product.count({ where: { inStock: true } }),
       prisma.product.count({ where: { inStock: false } }),
     ]),
-    prisma.lead.groupBy({
-      by: ["productId"],
-      where: { productId: { not: null } },
-      _count: { _all: true },
-      orderBy: { _count: { productId: "desc" } },
-      take: 5,
+    prisma.lead.findMany({
+      select: {
+        productId: true,
+        itemsJson: true,
+        message: true,
+        product: { select: { id: true, name: true } },
+      },
     }),
   ]);
 
@@ -168,17 +170,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     .sort((a, b) => b.count - a.count)
     .slice(0, 6);
 
-  const productIds = topProductGroups
-    .map((g) => g.productId)
-    .filter((id): id is string => Boolean(id));
-  const productNames =
-    productIds.length > 0
-      ? await prisma.product.findMany({
-          where: { id: { in: productIds } },
-          select: { id: true, name: true },
-        })
-      : [];
-  const nameById = new Map(productNames.map((p) => [p.id, p.name]));
+  const topProducts = aggregateLeadProductCounts(leadsForProducts).slice(0, 5);
 
   const [activeCount, hiddenCount, stockCount, orderCount] = catalogStatus;
 
@@ -215,18 +207,18 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       { name: "Преимущества", count: advantages },
       { name: "Страницы", count: pages },
     ],
-    topProducts: topProductGroups.map((g) => ({
-      name: (g.productId && nameById.get(g.productId)) || "Товар удалён",
-      count: g._count._all,
-    })),
-    recentLeads: recentLeads.map((lead) => ({
-      id: lead.id,
-      name: lead.name,
-      phone: lead.phone,
-      source: lead.source,
-      productName: lead.product?.name ?? null,
-      createdAt: lead.createdAt.toISOString(),
-    })),
+    topProducts,
+    recentLeads: recentLeads.map((lead) => {
+      const productNames = getLeadProductNames(lead);
+      return {
+        id: lead.id,
+        name: lead.name,
+        phone: lead.phone,
+        source: lead.source,
+        productName: productNames.length > 0 ? productNames.join(", ") : null,
+        createdAt: lead.createdAt.toISOString(),
+      };
+    }),
   };
 }
 

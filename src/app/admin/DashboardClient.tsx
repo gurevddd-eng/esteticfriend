@@ -293,7 +293,7 @@ export function DashboardClient({ stats }: { stats: DashboardStats }) {
     <div className="admin-page">
       <section className="admin-welcome">
         <div>
-          <p className="admin-welcome__kicker">ESTETIC CMS · Аналитика</p>
+          <p className="admin-welcome__kicker">SEVENS CMS · Аналитика</p>
           <h1 className="admin-welcome__title">Рабочий стол</h1>
           <p className="admin-welcome__text">
             Заявки, каталог и контент главной — сводка за последние две недели.

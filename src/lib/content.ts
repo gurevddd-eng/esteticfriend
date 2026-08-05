@@ -23,10 +23,10 @@ export type ProductDTO = {
 };
 
 export const SITE = {
-  name: "ESTETIC FRIEND",
+  name: "SEVENS",
   phone: "+7 (911) 929-77-47",
   phoneHref: "tel:+79119297747",
-  email: "info@esteticfriend.com",
+  email: "info@sevens.ru",
   cities: "Москва и Санкт-Петербург",
   tagline: "Профессиональное косметическое оборудование",
   about:

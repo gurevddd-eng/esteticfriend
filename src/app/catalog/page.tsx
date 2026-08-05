@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { SITE } from "@/lib/content";
 import { CatalogFilters } from "@/components/CatalogFilters";
 import { ProductCard } from "@/components/ProductCard";
 import { getCategories, getProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Каталог",
-  description: "Каталог профессионального косметического оборудования ESTETIC FRIEND",
+  description: `Каталог профессионального косметического оборудования ${SITE.name}`,
 };
 
 export default async function CatalogPage() {
