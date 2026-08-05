@@ -11,7 +11,7 @@ const HERO_SOURCES = {
 } as const;
 
 export function Hero({ site }: { site: SiteInfo }) {
-  const { videoRef, canvasRef, useStaticPoster, useCanvas, hideCanvas } =
+  const { videoRef, canvasRef, useCanvas, hideVideo, hideCanvas, hidePoster } =
     useYandexVideoBg(HERO_SOURCES);
 
   return (
@@ -21,26 +21,24 @@ export function Hero({ site }: { site: SiteInfo }) {
         <img
           src="/hero/poster.webp"
           alt=""
-          className="hero__poster"
+          className={`hero__poster${hidePoster ? " hero__poster--hidden" : ""}`}
           decoding="async"
           fetchPriority="high"
         />
-        {!useStaticPoster ? (
-          <video
-            ref={videoRef}
-            className="hero__video hero__video--hidden"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            poster="/hero/poster.webp"
-            disablePictureInPicture
-          >
-            <source src="/hero/main.mp4" type="video/mp4" />
-            <source src="/hero/main.webm" type="video/webm" />
-          </video>
-        ) : null}
+        <video
+          ref={videoRef}
+          className={`hero__video${hideVideo ? " hero__video--hidden" : ""}`}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/hero/poster.webp"
+          disablePictureInPicture
+        >
+          <source src="/hero/main.mp4" type="video/mp4" />
+          <source src="/hero/main.webm" type="video/webm" />
+        </video>
         {useCanvas ? (
           <canvas
             ref={canvasRef}

@@ -26,30 +26,78 @@ type Sources = {
 
 /**
  * Background video.
- * Mobile → static poster.
- * Desktop → mirror frames onto canvas (Chrome/Yandex paint a black
- * `<video>` layer while scrolling; canvas stays stable).
+ * Mobile → native <video>, object-fit: contain in a dedicated band.
+ * Desktop → canvas mirror (Chrome/Yandex scroll glitch workaround).
  */
 export function useYandexVideoBg(sources: Sources) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [hasFrame, setHasFrame] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
 
   useEffect(() => {
     setIsMobile(isMobileUa());
   }, []);
 
-  const useStaticPoster = isMobile;
+  const useNativeVideo = isMobile;
   const useCanvas = !isMobile;
 
   useEffect(() => {
-    if (useStaticPoster) return;
-
     const video = videoRef.current;
     if (!video) return;
 
     let cancelled = false;
+
+    const softPlay = () => {
+      if (cancelled || document.hidden) return;
+      video.muted = true;
+      video.defaultMuted = true;
+      void video.play().catch(() => undefined);
+    };
+
+    if (useNativeVideo) {
+      video.muted = true;
+      video.defaultMuted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.preload = "auto";
+      video.setAttribute("muted", "");
+      video.setAttribute("playsinline", "");
+      video.setAttribute("webkit-playsinline", "");
+
+      const onReady = () => {
+        if (video.readyState >= 2) setVideoReady(true);
+        softPlay();
+      };
+
+      video.addEventListener("canplay", onReady);
+      video.addEventListener("loadeddata", onReady);
+      video.addEventListener("playing", onReady);
+      softPlay();
+
+      const onVisibility = () => {
+        if (document.visibilityState === "visible") softPlay();
+        else {
+          try {
+            video.pause();
+          } catch {
+            /* ignore */
+          }
+        }
+      };
+      document.addEventListener("visibilitychange", onVisibility);
+
+      return () => {
+        cancelled = true;
+        video.removeEventListener("canplay", onReady);
+        video.removeEventListener("loadeddata", onReady);
+        video.removeEventListener("playing", onReady);
+        document.removeEventListener("visibilitychange", onVisibility);
+      };
+    }
+
+    if (!useCanvas) return;
     let objectUrl: string | null = null;
     let raf = 0;
     let framed = false;
@@ -177,18 +225,21 @@ export function useYandexVideoBg(sources: Sources) {
       document.removeEventListener("visibilitychange", onVisibility);
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [useStaticPoster, sources.mp4, sources.webm]);
+  }, [useCanvas, useNativeVideo, sources.mp4, sources.webm]);
 
-  // Raw <video> stays invisible (decoder layer blacks out on Chrome scroll).
-  // Canvas shows the frames. Until first canvas frame, poster shows through.
-  const hideCanvas = !hasFrame;
+  const hideVideo = !useNativeVideo;
+  const hideCanvas = !useCanvas || !hasFrame;
+  const hidePoster = useNativeVideo && videoReady;
 
   return {
     videoRef,
     canvasRef,
-    useStaticPoster,
+    useNativeVideo,
     useCanvas,
     hasFrame,
+    videoReady,
+    hideVideo,
     hideCanvas,
+    hidePoster,
   };
 }

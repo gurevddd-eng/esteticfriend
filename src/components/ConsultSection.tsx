@@ -11,7 +11,7 @@ const CONSULT_SOURCES = {
 } as const;
 
 export function ConsultSection({ site }: { site: SiteInfo }) {
-  const { videoRef, canvasRef, useStaticPoster, useCanvas, hideCanvas } =
+  const { videoRef, canvasRef, useCanvas, hideVideo, hideCanvas, hidePoster } =
     useYandexVideoBg(CONSULT_SOURCES);
 
   return (
@@ -21,25 +21,23 @@ export function ConsultSection({ site }: { site: SiteInfo }) {
         <img
           src="/about/about-1.webp"
           alt=""
-          className="consult__poster"
+          className={`consult__poster${hidePoster ? " consult__poster--hidden" : ""}`}
           decoding="async"
         />
-        {!useStaticPoster ? (
-          <video
-            ref={videoRef}
-            className="consult__video consult__video--hidden"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            poster="/about/about-1.webp"
-            disablePictureInPicture
-          >
-            <source src="/about/company.mp4" type="video/mp4" />
-            <source src="/about/company.webm" type="video/webm" />
-          </video>
-        ) : null}
+        <video
+          ref={videoRef}
+          className={`consult__video${hideVideo ? " consult__video--hidden" : ""}`}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/about/about-1.webp"
+          disablePictureInPicture
+        >
+          <source src="/about/company.mp4" type="video/mp4" />
+          <source src="/about/company.webm" type="video/webm" />
+        </video>
         {useCanvas ? (
           <canvas
             ref={canvasRef}

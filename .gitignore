@@ -50,3 +50,5 @@ next-env.d.ts
 
 # local font source (Next uses Google Tenor Sans)
 /Tenor Sans/
+
+scripts/deploy_remote.py
