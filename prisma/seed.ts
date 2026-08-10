@@ -10,6 +10,8 @@ import {
   PROMOS,
   SITE,
 } from "../src/lib/content";
+import { DEFAULT_CONTACT_WIDGET } from "../src/lib/contact-widget";
+import { PRODUCT_COMPARE_AT_META } from "../src/lib/product-sort";
 
 const prisma = new PrismaClient();
 
@@ -48,6 +50,8 @@ async function main() {
     const categoryId = categoryIdMap.get(product.categoryId);
     if (!categoryId) continue;
 
+    const compareAtPrice = PRODUCT_COMPARE_AT_META[product.slug] ?? null;
+
     await prisma.product.upsert({
       where: { slug: product.slug },
       update: {
@@ -56,6 +60,7 @@ async function main() {
         description: product.description,
         imageUrl: product.imageUrl,
         price: product.price,
+        compareAtPrice,
         inStock: product.inStock,
         isNew: product.isNew,
         isHit: product.isHit,
@@ -69,6 +74,7 @@ async function main() {
         description: product.description,
         imageUrl: product.imageUrl,
         price: product.price,
+        compareAtPrice,
         inStock: product.inStock,
         isNew: product.isNew,
         isHit: product.isHit,
@@ -235,6 +241,8 @@ async function main() {
     ],
     ["heroCtaPrimary", "Перейти в каталог"],
     ["heroCtaSecondary", "Получить консультацию"],
+    ["faviconUrl", "/brand/sevens.ico"],
+    ["contactWidget", JSON.stringify(DEFAULT_CONTACT_WIDGET)],
   ];
 
   for (const [key, value] of settings) {

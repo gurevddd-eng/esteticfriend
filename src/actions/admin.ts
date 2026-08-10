@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/prisma";
+import {
+  CONTACT_WIDGET_SETTING_KEY,
+  type ContactWidgetConfig,
+} from "@/lib/contact-widget";
 import { requireAdmin } from "@/lib/session";
 import { slugify } from "@/lib/slugify";
 
@@ -64,6 +68,7 @@ export async function saveProduct(
     description?: string;
     imageUrl?: string;
     price?: number | null;
+    compareAtPrice?: number | null;
     inStock?: boolean;
     isNew?: boolean;
     isHit?: boolean;
@@ -73,6 +78,17 @@ export async function saveProduct(
 ) {
   await assertAdmin();
   const slug = input.slug?.trim() || slugify(input.name);
+  const price =
+    input.price === null || input.price === undefined || input.price <= 0
+      ? null
+      : input.price;
+  const compareAtPrice =
+    input.compareAtPrice === null ||
+    input.compareAtPrice === undefined ||
+    input.compareAtPrice <= 0
+      ? null
+      : input.compareAtPrice;
+
   const data = {
     name: input.name.trim(),
     slug,
@@ -80,9 +96,8 @@ export async function saveProduct(
     shortDesc: input.shortDesc?.trim() || "",
     description: input.description?.trim() || "",
     imageUrl: input.imageUrl?.trim() || null,
-    price: input.price === null || input.price === undefined || input.price <= 0
-      ? null
-      : input.price,
+    price,
+    compareAtPrice,
     inStock: input.inStock ?? true,
     isNew: input.isNew ?? false,
     isHit: input.isHit ?? false,
@@ -462,6 +477,18 @@ export async function uploadCmsImage(formData: FormData) {
   await writeFile(path.join(uploadDir, filename), bytes);
 
   return { ok: true as const, url: `/uploads/${filename}` };
+}
+
+export async function saveContactWidgetConfig(config: ContactWidgetConfig) {
+  await assertAdmin();
+  await prisma.siteSetting.upsert({
+    where: { key: CONTACT_WIDGET_SETTING_KEY },
+    update: { value: JSON.stringify(config) },
+    create: { key: CONTACT_WIDGET_SETTING_KEY, value: JSON.stringify(config) },
+  });
+  revalidatePath("/");
+  revalidatePath("/admin/contact-widget");
+  return { ok: true as const };
 }
 
 export async function saveHomeContent(input: Record<string, string>) {

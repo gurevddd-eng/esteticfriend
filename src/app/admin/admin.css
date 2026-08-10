@@ -477,6 +477,13 @@
   color: var(--cms-muted);
 }
 
+.admin-field-hint {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--cms-muted);
+}
+
 .admin-empty {
   margin: 0;
   color: var(--cms-muted);

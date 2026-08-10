@@ -10,7 +10,14 @@ import {
   type CategoryDTO,
   type ProductDTO,
 } from "@/lib/content";
+import {
+  CONTACT_WIDGET_SETTING_KEY,
+  DEFAULT_CONTACT_WIDGET,
+  parseContactWidgetConfig,
+  type ContactWidgetConfig,
+} from "@/lib/contact-widget";
 import { prisma } from "@/lib/prisma";
+import { enrichProductForSort, type CatalogProduct } from "@/lib/product-sort";
 
 export type SiteInfo = {
   name: string;
@@ -102,6 +109,16 @@ function mapCategory(
   };
 }
 
+function toNumber(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  const num = Number(
+    typeof value === "object" && value !== null && "toString" in value
+      ? (value as { toString(): string }).toString()
+      : value,
+  );
+  return Number.isFinite(num) ? num : null;
+}
+
 function mapProduct(
   p: {
     id: string;
@@ -111,19 +128,18 @@ function mapProduct(
     description: string;
     imageUrl: string | null;
     price?: unknown;
+    compareAtPrice?: unknown;
     inStock: boolean;
     isNew: boolean;
     isHit: boolean;
     categoryId: string;
     category?: { id: string; slug: string; name: string } | null;
+    createdAt?: Date | string;
+    _count?: { leads: number };
   },
 ): ProductDTO {
-  const priceNum =
-    p.price === null || p.price === undefined
-      ? null
-      : Number(typeof p.price === "object" && p.price !== null && "toString" in p.price
-          ? (p.price as { toString(): string }).toString()
-          : p.price);
+  const priceNum = toNumber(p.price);
+  const compareAtPriceNum = toNumber(p.compareAtPrice);
 
   return {
     id: p.id,
@@ -134,7 +150,8 @@ function mapProduct(
     imageUrl: p.imageUrl
       ? p.imageUrl.replace(/\.(png|jpe?g)$/i, ".webp")
       : p.imageUrl,
-    price: Number.isFinite(priceNum) ? priceNum : null,
+    price: priceNum,
+    compareAtPrice: compareAtPriceNum,
     inStock: p.inStock,
     isNew: p.isNew,
     isHit: p.isHit,
@@ -182,7 +199,7 @@ export async function getProducts(options?: {
   isNew?: boolean;
   isHit?: boolean;
   take?: number;
-}): Promise<ProductDTO[]> {
+}): Promise<CatalogProduct[]> {
   if (!(await dbAvailable())) {
     let items = [...FALLBACK_PRODUCTS];
     if (options?.categorySlug === "novinki" || options?.isNew) {
@@ -192,7 +209,7 @@ export async function getProducts(options?: {
     }
     if (options?.isHit) items = items.filter((p) => p.isHit);
     if (options?.take) items = items.slice(0, options.take);
-    return items;
+    return items.map((product) => enrichProductForSort(product));
   }
 
   const where: {
@@ -211,16 +228,215 @@ export async function getProducts(options?: {
 
   const rows = await prisma.product.findMany({
     where,
-    include: { category: { select: { id: true, slug: true, name: true } } },
+    include: {
+      category: { select: { id: true, slug: true, name: true } },
+      _count: { select: { leads: true } },
+    },
     orderBy: [{ isHit: "desc" }, { updatedAt: "desc" }],
     take: options?.take,
   });
 
   if (!rows.length && !(await prisma.product.count())) {
-    return FALLBACK_PRODUCTS;
+    return FALLBACK_PRODUCTS.map((product) => enrichProductForSort(product));
   }
 
-  return rows.map(mapProduct);
+  return rows.map((row) =>
+    enrichProductForSort(mapProduct(row), {
+      leadCount: row._count.leads,
+      createdAt: row.createdAt.toISOString(),
+    }),
+  );
+}
+
+export type SearchCategoryResult = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  products: ProductDTO[];
+};
+
+export type SearchCatalogResult = {
+  categories: SearchCategoryResult[];
+  products: ProductDTO[];
+};
+
+function queryTokens(normalizedQuery: string) {
+  return normalizedQuery.split(/\s+/).filter(Boolean);
+}
+
+function matchesTokens(haystackParts: Array<string | null | undefined>, normalizedQuery: string) {
+  const haystack = haystackParts
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return queryTokens(normalizedQuery).every((token) => haystack.includes(token));
+}
+
+function matchesCategoryQuery(category: CategoryDTO, normalizedQuery: string): boolean {
+  return matchesTokens(
+    [category.name, category.description, category.slug.replace(/-/g, " ")],
+    normalizedQuery,
+  );
+}
+
+function matchesProductDirectQuery(product: ProductDTO, normalizedQuery: string): boolean {
+  return matchesTokens(
+    [product.name, product.shortDesc, product.slug.replace(/-/g, " ")],
+    normalizedQuery,
+  );
+}
+
+function categoryProductWhere(categoryId: string) {
+  return {
+    categoryId,
+    isActive: true,
+  } as const;
+}
+
+function directProductWhere(trimmed: string, excludeIds: string[]) {
+  const tokens = queryTokens(trimmed.toLowerCase());
+  return {
+    isActive: true,
+    ...(excludeIds.length ? { id: { notIn: excludeIds } } : {}),
+    AND: tokens.map((token) => ({
+      OR: [
+        { name: { contains: token, mode: "insensitive" as const } },
+        { shortDesc: { contains: token, mode: "insensitive" as const } },
+        { slug: { contains: token, mode: "insensitive" as const } },
+      ],
+    })),
+  };
+}
+
+function categoryWhere(trimmed: string) {
+  const tokens = queryTokens(trimmed.toLowerCase());
+  return {
+    AND: tokens.map((token) => ({
+      OR: [
+        { name: { contains: token, mode: "insensitive" as const } },
+        { description: { contains: token, mode: "insensitive" as const } },
+        { slug: { contains: token, mode: "insensitive" as const } },
+      ],
+    })),
+  };
+}
+
+async function getCategoryProducts(categoryId: string, categorySlug: string) {
+  const rows = await prisma.product.findMany({
+    where: categoryProductWhere(categoryId),
+    include: { category: { select: { id: true, slug: true, name: true } } },
+    orderBy: [{ isHit: "desc" }, { name: "asc" }],
+  });
+
+  if (rows.length) return rows.map(mapProduct);
+
+  return FALLBACK_PRODUCTS.filter(
+    (product) => product.category?.slug === categorySlug || product.categoryId === categoryId,
+  );
+}
+
+export async function searchCatalog(
+  query: string,
+  options?: { productLimit?: number },
+): Promise<SearchCatalogResult> {
+  const trimmed = query.trim();
+  if (!trimmed) return { categories: [], products: [] };
+
+  const normalized = trimmed.toLowerCase();
+  const productLimit = options?.productLimit ?? 8;
+
+  if (!(await dbAvailable())) {
+    const categories = FALLBACK_CATEGORIES.filter((category) =>
+      matchesCategoryQuery(category, normalized),
+    ).map((category) => ({
+      id: category.id,
+      slug: category.slug,
+      name: category.name,
+      description: category.description,
+      products: FALLBACK_PRODUCTS.filter(
+        (product) =>
+          product.category?.slug === category.slug || product.categoryId === category.id,
+      ),
+    }));
+
+    const shownProductIds = new Set(
+      categories.flatMap((category) => category.products.map((product) => product.id)),
+    );
+
+    const products = FALLBACK_PRODUCTS.filter(
+      (product) =>
+        matchesProductDirectQuery(product, normalized) && !shownProductIds.has(product.id),
+    ).slice(0, productLimit);
+
+    return { categories, products };
+  }
+
+  const categoryRows = await prisma.category.findMany({
+    where: categoryWhere(trimmed),
+    orderBy: { sortOrder: "asc" },
+  });
+
+  let categories: SearchCategoryResult[] = await Promise.all(
+    categoryRows.map(async (category) => ({
+      id: category.id,
+      slug: category.slug,
+      name: category.name,
+      description: category.description,
+      products: await getCategoryProducts(category.id, category.slug),
+    })),
+  );
+
+  if (!categories.length && !(await prisma.category.count())) {
+    categories = FALLBACK_CATEGORIES.filter((category) =>
+      matchesCategoryQuery(category, normalized),
+    ).map((category) => ({
+      id: category.id,
+      slug: category.slug,
+      name: category.name,
+      description: category.description,
+      products: FALLBACK_PRODUCTS.filter(
+        (product) =>
+          product.category?.slug === category.slug || product.categoryId === category.id,
+      ),
+    }));
+  }
+
+  const shownProductIds = categories.flatMap((category) =>
+    category.products.map((product) => product.id),
+  );
+
+  const directRows = await prisma.product.findMany({
+    where: directProductWhere(trimmed, shownProductIds),
+    include: { category: { select: { id: true, slug: true, name: true } } },
+    orderBy: [{ isHit: "desc" }, { name: "asc" }],
+    take: productLimit,
+  });
+
+  let products = directRows.map(mapProduct);
+
+  if (!products.length && !categories.length && !(await prisma.product.count())) {
+    const shownIds = new Set(shownProductIds);
+    products = FALLBACK_PRODUCTS.filter(
+      (product) =>
+        matchesProductDirectQuery(product, normalized) && !shownIds.has(product.id),
+    ).slice(0, productLimit);
+  }
+
+  return { categories, products };
+}
+
+export async function searchProducts(
+  query: string,
+  limit = 8,
+): Promise<ProductDTO[]> {
+  const { categories, products } = await searchCatalog(query, { productLimit: limit });
+  const fromCategories = categories.flatMap((category) => category.products);
+  const shownIds = new Set(fromCategories.map((product) => product.id));
+  const extras = products.filter((product) => !shownIds.has(product.id));
+
+  return [...fromCategories, ...extras];
 }
 
 export async function getProductBySlug(slug: string): Promise<ProductDTO | null> {
@@ -245,6 +461,13 @@ export async function getSettings(): Promise<Record<string, string>> {
   const rows = await prisma.siteSetting.findMany();
   return Object.fromEntries(rows.map((r) => [r.key, r.value]));
 }
+
+export async function getContactWidgetConfig(): Promise<ContactWidgetConfig> {
+  const settings = await getSettings();
+  return parseContactWidgetConfig(settings[CONTACT_WIDGET_SETTING_KEY]);
+}
+
+export type { ContactWidgetConfig };
 
 export async function getSiteInfo(): Promise<SiteInfo> {
   const settings = await getSettings();

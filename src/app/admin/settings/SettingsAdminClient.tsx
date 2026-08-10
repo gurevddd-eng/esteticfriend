@@ -113,6 +113,9 @@ export function SettingsAdminClient({
           </p>
         </div>
         <div className="admin-page__actions">
+          <Link href="/admin/contact-widget" className="btn-outline">
+            Кнопка связи
+          </Link>
           <Link href="/admin/integrations" className="btn-outline">
             Интеграции
           </Link>

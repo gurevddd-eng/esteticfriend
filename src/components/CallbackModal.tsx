@@ -7,9 +7,19 @@ import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 export function CallbackModal({
   open,
   onClose,
+  title = "Обратный звонок",
+  description = "Оставьте контакты — перезвоним в рабочее время.",
+  source = "callback",
+  compact = true,
+  ariaLabel = title,
 }: {
   open: boolean;
   onClose: () => void;
+  title?: string;
+  description?: string;
+  source?: string;
+  compact?: boolean;
+  ariaLabel?: string;
 }) {
   useBodyScrollLock(open);
 
@@ -31,18 +41,16 @@ export function CallbackModal({
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Обратный звонок"
+        aria-label={ariaLabel}
       >
         <button type="button" className="modal-close" onClick={onClose} aria-label="Закрыть">
           ×
         </button>
         <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
-          Обратный звонок
+          {title}
         </h2>
-        <p className="mt-2 mb-5 text-sm text-muted">
-          Оставьте контакты — перезвоним в рабочее время.
-        </p>
-        <LeadForm source="callback" compact onSuccess={onClose} />
+        <p className="mt-2 mb-5 text-sm text-muted">{description}</p>
+        <LeadForm source={source} compact={compact} onSuccess={onClose} />
       </div>
     </div>
   );

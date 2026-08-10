@@ -47,7 +47,11 @@ export const ADMIN_SECTIONS: AdminNavSection[] = [
   {
     id: "system",
     label: "Система",
-    items: [{ href: "/admin/settings", label: "Настройки" }, { href: "/admin/integrations", label: "Интеграции" }],
+    items: [
+      { href: "/admin/settings", label: "Настройки" },
+      { href: "/admin/contact-widget", label: "Кнопка связи" },
+      { href: "/admin/integrations", label: "Интеграции" },
+    ],
   },
 ];
 
