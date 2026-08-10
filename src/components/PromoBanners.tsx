@@ -30,14 +30,7 @@ export function PromoBanners({ promos }: { promos: PromoDTO[] }) {
               <p className="promo-banner__eyebrow">{promo.eyebrow}</p>
               <h2 className="promo-banner__title">{promo.title}</h2>
               <p className="promo-banner__text">{promo.text}</p>
-              <Link
-                href={promo.href}
-                className={
-                  promo.tone === "navy"
-                    ? "btn-lime promo-banner__cta"
-                    : "btn-primary promo-banner__cta"
-                }
-              >
+              <Link href={promo.href} className="btn-lime promo-banner__cta">
                 {promo.cta}
               </Link>
             </div>
