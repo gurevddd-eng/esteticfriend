@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { ProductsAdminClient } from "./ProductsAdminClient";
 
 export default async function AdminProductsPage() {
-  const [products, categories] = await Promise.all([
+  const [products, categories, brands] = await Promise.all([
     prisma.product.findMany({
       select: {
         id: true,
@@ -15,11 +15,17 @@ export default async function AdminProductsPage() {
         isHit: true,
         isActive: true,
         categoryId: true,
+        brandId: true,
         category: { select: { name: true } },
+        brand: { select: { name: true } },
       },
       orderBy: { updatedAt: "desc" },
     }),
     prisma.category.findMany({
+      select: { id: true, name: true },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    }),
+    prisma.brand.findMany({
       select: { id: true, name: true },
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     }),
@@ -32,6 +38,7 @@ export default async function AdminProductsPage() {
         price: p.price === null ? null : Number(p.price),
       }))}
       categories={categories}
+      brands={brands}
     />
   );
 }

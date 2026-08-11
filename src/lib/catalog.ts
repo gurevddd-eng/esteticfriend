@@ -9,6 +9,7 @@ import {
   SITE,
   type CategoryDTO,
   type ProductDTO,
+  type BrandDTO,
 } from "@/lib/content";
 import {
   CONTACT_WIDGET_SETTING_KEY,
@@ -44,11 +45,25 @@ export type FaqDTO = {
   sortOrder: number;
 };
 
-export type BrandDTO = {
-  id: string;
-  name: string;
-  sortOrder: number;
+export type BrandsSectionConfig = {
+  kicker: string;
+  title: string;
+  lead: string;
+  cta: string;
+  ctaHref: string;
+  isEnabled: boolean;
 };
+
+const DEFAULT_BRANDS_SECTION: BrandsSectionConfig = {
+  kicker: "Партнёры",
+  title: "Письма о полномочиях",
+  lead: "Работаем с проверенными заводами и по запросу предоставляем документы на оборудование.",
+  cta: "Смотреть сертификаты",
+  ctaHref: "/certificates",
+  isEnabled: true,
+};
+
+export type { BrandDTO };
 
 export type AdvantageDTO = {
   id: string;
@@ -119,6 +134,26 @@ function toNumber(value: unknown): number | null {
   return Number.isFinite(num) ? num : null;
 }
 
+function mapBrand(
+  b: {
+    id: string;
+    slug: string;
+    name: string;
+    description?: string;
+    sortOrder: number;
+    _count?: { products: number };
+  },
+): BrandDTO {
+  return {
+    id: b.id,
+    slug: b.slug,
+    name: b.name,
+    description: b.description,
+    sortOrder: b.sortOrder,
+    _count: b._count,
+  };
+}
+
 function mapProduct(
   p: {
     id: string;
@@ -133,7 +168,9 @@ function mapProduct(
     isNew: boolean;
     isHit: boolean;
     categoryId: string;
+    brandId?: string | null;
     category?: { id: string; slug: string; name: string } | null;
+    brand?: { id: string; slug: string; name: string } | null;
     createdAt?: Date | string;
     _count?: { leads: number };
   },
@@ -159,6 +196,10 @@ function mapProduct(
     category: p.category
       ? { id: p.category.id, slug: p.category.slug, name: p.category.name }
       : undefined,
+    brandId: p.brandId ?? null,
+    brand: p.brand
+      ? { id: p.brand.id, slug: p.brand.slug, name: p.brand.name }
+      : null,
   };
 }
 
@@ -196,6 +237,7 @@ export async function getCategoryBySlug(slug: string) {
 
 export async function getProducts(options?: {
   categorySlug?: string;
+  brandSlug?: string;
   isNew?: boolean;
   isHit?: boolean;
   take?: number;
@@ -207,6 +249,9 @@ export async function getProducts(options?: {
     } else if (options?.categorySlug) {
       items = items.filter((p) => p.category?.slug === options.categorySlug);
     }
+    if (options?.brandSlug) {
+      items = items.filter((p) => p.brand?.slug === options.brandSlug);
+    }
     if (options?.isHit) items = items.filter((p) => p.isHit);
     if (options?.take) items = items.slice(0, options.take);
     return items.map((product) => enrichProductForSort(product));
@@ -217,6 +262,7 @@ export async function getProducts(options?: {
     isNew?: boolean;
     isHit?: boolean;
     category?: { slug: string };
+    brand?: { slug: string };
   } = { isActive: true };
 
   if (options?.categorySlug === "novinki" || options?.isNew) {
@@ -224,12 +270,14 @@ export async function getProducts(options?: {
   } else if (options?.categorySlug) {
     where.category = { slug: options.categorySlug };
   }
+  if (options?.brandSlug) where.brand = { slug: options.brandSlug };
   if (options?.isHit) where.isHit = true;
 
   const rows = await prisma.product.findMany({
     where,
     include: {
       category: { select: { id: true, slug: true, name: true } },
+      brand: { select: { id: true, slug: true, name: true } },
       _count: { select: { leads: true } },
     },
     orderBy: [{ isHit: "desc" }, { updatedAt: "desc" }],
@@ -283,7 +331,12 @@ function matchesCategoryQuery(category: CategoryDTO, normalizedQuery: string): b
 
 function matchesProductDirectQuery(product: ProductDTO, normalizedQuery: string): boolean {
   return matchesTokens(
-    [product.name, product.shortDesc, product.slug.replace(/-/g, " ")],
+    [
+      product.name,
+      product.shortDesc,
+      product.brand?.name,
+      product.slug.replace(/-/g, " "),
+    ],
     normalizedQuery,
   );
 }
@@ -305,6 +358,7 @@ function directProductWhere(trimmed: string, excludeIds: string[]) {
         { name: { contains: token, mode: "insensitive" as const } },
         { shortDesc: { contains: token, mode: "insensitive" as const } },
         { slug: { contains: token, mode: "insensitive" as const } },
+        { brand: { name: { contains: token, mode: "insensitive" as const } } },
       ],
     })),
   };
@@ -326,7 +380,10 @@ function categoryWhere(trimmed: string) {
 async function getCategoryProducts(categoryId: string, categorySlug: string) {
   const rows = await prisma.product.findMany({
     where: categoryProductWhere(categoryId),
-    include: { category: { select: { id: true, slug: true, name: true } } },
+    include: {
+      category: { select: { id: true, slug: true, name: true } },
+      brand: { select: { id: true, slug: true, name: true } },
+    },
     orderBy: [{ isHit: "desc" }, { name: "asc" }],
   });
 
@@ -409,7 +466,10 @@ export async function searchCatalog(
 
   const directRows = await prisma.product.findMany({
     where: directProductWhere(trimmed, shownProductIds),
-    include: { category: { select: { id: true, slug: true, name: true } } },
+    include: {
+      category: { select: { id: true, slug: true, name: true } },
+      brand: { select: { id: true, slug: true, name: true } },
+    },
     orderBy: [{ isHit: "desc" }, { name: "asc" }],
     take: productLimit,
   });
@@ -446,7 +506,10 @@ export async function getProductBySlug(slug: string): Promise<ProductDTO | null>
 
   const row = await prisma.product.findFirst({
     where: { slug, isActive: true },
-    include: { category: { select: { id: true, slug: true, name: true } } },
+    include: {
+      category: { select: { id: true, slug: true, name: true } },
+      brand: { select: { id: true, slug: true, name: true } },
+    },
   });
   return row ? mapProduct(row) : null;
 }
@@ -527,6 +590,7 @@ export async function getBrands(): Promise<BrandDTO[]> {
   if (!(await dbAvailable())) {
     return BRANDS.map((name, index) => ({
       id: `brand-${index}`,
+      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       name,
       sortOrder: index,
     }));
@@ -539,15 +603,55 @@ export async function getBrands(): Promise<BrandDTO[]> {
   if (!rows.length) {
     return BRANDS.map((name, index) => ({
       id: `brand-${index}`,
+      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       name,
       sortOrder: index,
     }));
   }
-  return rows.map((r) => ({
-    id: r.id,
-    name: r.name,
-    sortOrder: r.sortOrder,
-  }));
+  return rows.map(mapBrand);
+}
+
+export async function getBrandsWithCounts(): Promise<BrandDTO[]> {
+  if (!(await dbAvailable())) {
+    return getBrands();
+  }
+
+  const rows = await prisma.brand.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: "asc" },
+    include: {
+      _count: { select: { products: { where: { isActive: true } } } },
+    },
+  });
+  if (!rows.length) return getBrands();
+  return rows.map(mapBrand);
+}
+
+export async function getBrandBySlug(slug: string): Promise<BrandDTO | null> {
+  if (!(await dbAvailable())) {
+    const brands = await getBrands();
+    return brands.find((brand) => brand.slug === slug) ?? null;
+  }
+
+  const row = await prisma.brand.findFirst({
+    where: { slug, isActive: true },
+    include: {
+      _count: { select: { products: { where: { isActive: true } } } },
+    },
+  });
+  return row ? mapBrand(row) : null;
+}
+
+export async function getBrandsSectionConfig(): Promise<BrandsSectionConfig> {
+  const settings = await getSettings();
+  return {
+    kicker: settings.brandsKicker || DEFAULT_BRANDS_SECTION.kicker,
+    title: settings.brandsTitle || DEFAULT_BRANDS_SECTION.title,
+    lead: settings.brandsLead || DEFAULT_BRANDS_SECTION.lead,
+    cta: settings.brandsCta || DEFAULT_BRANDS_SECTION.cta,
+    ctaHref: settings.brandsCtaHref || DEFAULT_BRANDS_SECTION.ctaHref,
+    isEnabled: settings.brandsSectionEnabled !== "0",
+  };
 }
 
 export async function getAdvantages(): Promise<AdvantageDTO[]> {

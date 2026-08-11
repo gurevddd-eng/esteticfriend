@@ -6,16 +6,19 @@ import { useRouter } from "next/navigation";
 import { deleteProduct, saveProduct, uploadProductImage } from "@/actions/admin";
 
 type Category = { id: string; name: string };
+type BrandOption = { id: string; name: string };
 
 type Product = {
   id?: string;
   name: string;
   slug: string;
   categoryId: string;
+  brandId?: string | null;
   shortDesc: string;
   description: string;
   imageUrl: string | null;
   price: number | null;
+  compareAtPrice: number | null;
   inStock: boolean;
   isNew: boolean;
   isHit: boolean;
@@ -77,9 +80,11 @@ function formatPrice(price: number | null) {
 
 export function ProductForm({
   categories,
+  brands,
   product,
 }: {
   categories: Category[];
+  brands: BrandOption[];
   product?: Product;
 }) {
   const router = useRouter();
@@ -94,11 +99,17 @@ export function ProductForm({
   const [name, setName] = useState(product?.name || "");
   const [slug, setSlug] = useState(product?.slug || "");
   const [categoryId, setCategoryId] = useState(product?.categoryId || "");
+  const [brandId, setBrandId] = useState(product?.brandId || "");
   const [shortDesc, setShortDesc] = useState(product?.shortDesc || "");
   const [description, setDescription] = useState(product?.description || "");
   const [imageUrl, setImageUrl] = useState(product?.imageUrl || "");
   const [price, setPrice] = useState(
     product?.price === null || product?.price === undefined ? "" : String(product.price),
+  );
+  const [compareAtPrice, setCompareAtPrice] = useState(
+    product?.compareAtPrice === null || product?.compareAtPrice === undefined
+      ? ""
+      : String(product.compareAtPrice),
   );
   const [inStock, setInStock] = useState(product?.inStock ?? true);
   const [isNew, setIsNew] = useState(product?.isNew ?? false);
@@ -110,10 +121,20 @@ export function ProductForm({
     [categories, categoryId],
   );
 
+  const brandName = useMemo(
+    () => brands.find((b) => b.id === brandId)?.name || null,
+    [brands, brandId],
+  );
+
   const priceNumber = useMemo(() => {
     const n = Number(price);
     return price.trim() && Number.isFinite(n) ? n : null;
   }, [price]);
+
+  const compareAtPriceNumber = useMemo(() => {
+    const n = Number(compareAtPrice);
+    return compareAtPrice.trim() && Number.isFinite(n) ? n : null;
+  }, [compareAtPrice]);
 
   useEffect(() => {
     if (slugLocked) return;
@@ -141,10 +162,12 @@ export function ProductForm({
         name,
         slug: slug || undefined,
         categoryId,
+        brandId: brandId || null,
         shortDesc,
         description,
         imageUrl: imageUrl || undefined,
         price: priceNumber,
+        compareAtPrice: compareAtPriceNumber,
         inStock,
         isNew,
         isHit,
@@ -189,10 +212,12 @@ export function ProductForm({
     name,
     slug,
     categoryId,
+    brandId,
     shortDesc,
     description,
     imageUrl,
     priceNumber,
+    compareAtPriceNumber,
     inStock,
     isNew,
     isHit,
@@ -338,6 +363,24 @@ export function ProductForm({
                 </select>
               </label>
               <label className="admin-field">
+                <span>Бренд</span>
+                <select
+                  className="input-field"
+                  value={brandId}
+                  onChange={(e) => setBrandId(e.target.value)}
+                >
+                  <option value="">Без бренда</option>
+                  {brands.map((brand) => (
+                    <option key={brand.id} value={brand.id}>
+                      {brand.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="admin-modal-form__row">
+              <label className="admin-field">
                 <span>Цена, ₽</span>
                 <input
                   className="input-field"
@@ -350,6 +393,24 @@ export function ProductForm({
                 />
               </label>
             </div>
+
+            <div className="admin-modal-form__row">
+              <label className="admin-field">
+                <span>Старая цена, ₽</span>
+                <input
+                  className="input-field"
+                  type="number"
+                  min={0}
+                  step={1}
+                  value={compareAtPrice}
+                  onChange={(e) => setCompareAtPrice(e.target.value)}
+                  placeholder="Для сортировки по скидке"
+                />
+              </label>
+            </div>
+            <p className="admin-field-hint">
+              Старая цена должна быть выше текущей — тогда товар участвует в сортировке по скидке.
+            </p>
           </section>
 
           <section className="admin-settings-card">
@@ -462,7 +523,9 @@ export function ProductForm({
                   {isHit ? <span>Hit</span> : null}
                 </div>
               </div>
-              <p className="admin-product-preview__cat">{categoryName}</p>
+              <p className="admin-product-preview__cat">
+                {[brandName, categoryName].filter(Boolean).join(" · ")}
+              </p>
               <h3>{name.trim() || "Название товара"}</h3>
               <p className="admin-product-preview__text">
                 {shortDesc.trim() || "Краткое описание появится здесь"}

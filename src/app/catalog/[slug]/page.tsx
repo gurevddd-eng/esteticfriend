@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CatalogFilters } from "@/components/CatalogFilters";
-import { ProductCard } from "@/components/ProductCard";
+import { CatalogProductGrid } from "@/components/CatalogProductGrid";
 import { getCategories, getCategoryBySlug, getProducts } from "@/lib/catalog";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -40,11 +40,7 @@ export default async function CategoryPage({ params }: Props) {
       <CatalogFilters categories={categories} activeSlug={slug} />
 
       {products.length ? (
-        <div className="catalog-grid">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <CatalogProductGrid products={products} />
       ) : (
         <div className="page-empty">
           <h2 className="page-empty__title">В этой категории пока нет позиций</h2>

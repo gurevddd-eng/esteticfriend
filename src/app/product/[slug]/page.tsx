@@ -68,14 +68,21 @@ export default async function ProductPage({ params }: Props) {
         </div>
 
         <div>
-          {product.category ? (
-            <Link
-              href={`/catalog/${product.category.slug}`}
-              className="product-page__category"
-            >
-              {product.category.name}
-            </Link>
-          ) : null}
+          <div className="product-page__meta">
+            {product.brand ? (
+              <Link href={`/brands/${product.brand.slug}`} className="product-page__category">
+                {product.brand.name}
+              </Link>
+            ) : null}
+            {product.category ? (
+              <Link
+                href={`/catalog/${product.category.slug}`}
+                className="product-page__category"
+              >
+                {product.category.name}
+              </Link>
+            ) : null}
+          </div>
           <h1 className="section-title mt-3">{product.name}</h1>
           <p className="page__lead">{product.shortDesc}</p>
 

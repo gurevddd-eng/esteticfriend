@@ -27,7 +27,6 @@ export const ADMIN_SECTIONS: AdminNavSection[] = [
       { href: "/admin/slides", label: "Слайды" },
       { href: "/admin/promos", label: "Промо" },
       { href: "/admin/faq", label: "FAQ" },
-      { href: "/admin/brands", label: "Бренды" },
       { href: "/admin/advantages", label: "Преимущества" },
     ],
   },
@@ -37,6 +36,7 @@ export const ADMIN_SECTIONS: AdminNavSection[] = [
     items: [
       { href: "/admin/products", label: "Товары" },
       { href: "/admin/categories", label: "Категории" },
+      { href: "/admin/brands", label: "Бренды" },
     ],
   },
   {

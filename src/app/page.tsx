@@ -12,6 +12,7 @@ import { PromoBanners } from "@/components/PromoBanners";
 import {
   getAdvantages,
   getBrands,
+  getBrandsSectionConfig,
   getCategories,
   getFaqs,
   getHeroSlides,
@@ -21,13 +22,14 @@ import {
 } from "@/lib/catalog";
 
 export default async function HomePage() {
-  const [categories, hits, site, faqs, brands, advantages, promos, slides] =
+  const [categories, hits, site, faqs, brands, brandsSection, advantages, promos, slides] =
     await Promise.all([
       getCategories(),
       getProducts({ isHit: true, take: 12 }),
       getSiteInfo(),
       getFaqs(),
       getBrands(),
+      getBrandsSectionConfig(),
       getAdvantages(),
       getPromos(),
       getHeroSlides(),
@@ -45,7 +47,7 @@ export default async function HomePage() {
       </section>
 
       <CategoryShowcase categories={categories} />
-      <BrandsSection brands={brands} />
+      <BrandsSection brands={brands} config={brandsSection} />
       <FaqSection items={faqs} />
       <Advantages items={advantages} />
       <CompanyVideo site={site} />

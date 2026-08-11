@@ -35,14 +35,24 @@ export function ProductCard({ product }: { product: ProductDTO }) {
       </Link>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
-        {product.category ? (
-          <Link
-            href={`/catalog/${product.category.slug}`}
-            className="text-xs font-bold tracking-wide text-azure uppercase"
-          >
-            {product.category.name}
-          </Link>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          {product.brand ? (
+            <Link
+              href={`/brands/${product.brand.slug}`}
+              className="text-xs font-bold tracking-wide text-azure uppercase"
+            >
+              {product.brand.name}
+            </Link>
+          ) : null}
+          {product.category ? (
+            <Link
+              href={`/catalog/${product.category.slug}`}
+              className="text-xs font-bold tracking-wide text-azure uppercase"
+            >
+              {product.category.name}
+            </Link>
+          ) : null}
+        </div>
         <h3 className="font-[family-name:var(--font-syne)] text-lg font-normal leading-snug text-navy">
           <Link href={`/product/${product.slug}`}>{product.name}</Link>
         </h3>

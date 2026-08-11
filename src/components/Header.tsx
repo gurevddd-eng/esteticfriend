@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { CallbackModal } from "@/components/CallbackModal";
+import { HeaderSearch } from "@/components/HeaderSearch";
 import { useCart } from "@/components/CartProvider";
 import { useCompare, useFavorites } from "@/components/ProductListsProvider";
 import {
@@ -39,6 +40,10 @@ export function Header({
 
   const catalogCategories = categories.filter((c) => c.slug !== "novinki");
   const secondaryLinks = NAV_LINKS.filter((l) => l.href !== "/catalog");
+
+  function headerNavLabel(link: (typeof NAV_LINKS)[number]) {
+    return "shortLabel" in link && link.shortLabel ? link.shortLabel : link.label;
+  }
 
   useBodyScrollLock(menuOpen);
 
@@ -99,7 +104,10 @@ export function Header({
     <>
       <header className={`site-header${catalogOpen ? " is-catalog-open" : ""}`}>
         <div className="site-header__bar">
-          <BrandLogo size="lg" className="site-header__brand" logoUrl={site.logoUrl} />
+          <div className="site-header__start">
+            <BrandLogo size="lg" className="site-header__brand" logoUrl={site.logoUrl} />
+            <HeaderSearch />
+          </div>
 
           <nav className="site-header__nav" aria-label="Основная навигация">
             <div
@@ -163,7 +171,7 @@ export function Header({
 
             {secondaryLinks.map((link) => (
               <Link key={link.href} href={link.href} className="site-header__link">
-                {link.label}
+                {headerNavLabel(link)}
               </Link>
             ))}
           </nav>
@@ -174,7 +182,7 @@ export function Header({
             </a>
             <button
               type="button"
-              className="site-header__icon site-header__icon--desktop"
+              className="site-header__icon site-header__icon--desktop site-header__icon--callback"
               aria-label="Обратный звонок"
               onClick={() => setCallbackOpen(true)}
             >

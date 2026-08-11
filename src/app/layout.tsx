@@ -14,7 +14,8 @@ const tenorSans = Tenor_Sans({
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings();
-  const favicon = settings.faviconUrl?.trim() || "/brand/sevens.ico";
+  const favicon = settings.faviconUrl?.trim() || "/brand/favicon.svg";
+  const faviconFallback = "/brand/icon-32.png";
   const apple =
     settings.faviconUrl?.trim() || settings.logoUrl?.trim() || "/brand/apple-touch-icon.png";
 
@@ -27,10 +28,11 @@ export async function generateMetadata(): Promise<Metadata> {
       "Поставка профессионального косметического оборудования. Офисы в Москве и Санкт-Петербурге, доставка по России и СНГ, обучение и сервис.",
     icons: {
       icon: [
-        { url: favicon, sizes: "any" },
-        { url: "/brand/icon-32.png", sizes: "32x32", type: "image/png" },
+        { url: favicon, type: "image/svg+xml" },
+        { url: faviconFallback, sizes: "32x32", type: "image/png" },
+        { url: "/brand/sevens.ico", sizes: "any" },
       ],
-      shortcut: favicon,
+      shortcut: faviconFallback,
       apple: [{ url: apple, sizes: "180x180", type: "image/png" }],
     },
   };

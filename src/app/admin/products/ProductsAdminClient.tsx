@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { deleteProduct } from "@/actions/admin";
 
 type CategoryOption = { id: string; name: string };
+type BrandOption = { id: string; name: string };
 
 type ProductRow = {
   id: string;
@@ -18,7 +19,9 @@ type ProductRow = {
   isHit: boolean;
   isActive: boolean;
   categoryId: string;
+  brandId: string | null;
   category: { name: string };
+  brand: { name: string } | null;
 };
 
 function formatPrice(price: number | null) {
@@ -29,13 +32,16 @@ function formatPrice(price: number | null) {
 export function ProductsAdminClient({
   products,
   categories = [],
+  brands = [],
 }: {
   products: ProductRow[];
   categories?: CategoryOption[];
+  brands?: BrandOption[];
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [brandFilter, setBrandFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "hidden">("all");
 
   const activeCount = products.filter((p) => p.isActive).length;
@@ -44,16 +50,21 @@ export function ProductsAdminClient({
     const q = query.trim().toLowerCase();
     return products.filter((p) => {
       if (categoryFilter !== "all" && p.categoryId !== categoryFilter) return false;
+      if (brandFilter === "none" && p.brandId) return false;
+      if (brandFilter !== "all" && brandFilter !== "none" && p.brandId !== brandFilter) {
+        return false;
+      }
       if (statusFilter === "active" && !p.isActive) return false;
       if (statusFilter === "hidden" && p.isActive) return false;
       if (!q) return true;
       return (
         p.name.toLowerCase().includes(q) ||
         p.slug.toLowerCase().includes(q) ||
-        p.category.name.toLowerCase().includes(q)
+        p.category.name.toLowerCase().includes(q) ||
+        (p.brand?.name.toLowerCase().includes(q) ?? false)
       );
     });
-  }, [products, query, categoryFilter, statusFilter]);
+  }, [products, query, categoryFilter, brandFilter, statusFilter]);
 
   return (
     <div className="admin-page">
@@ -69,6 +80,9 @@ export function ProductsAdminClient({
         <div className="admin-page__actions">
           <Link href="/admin/categories" className="btn-outline">
             Категории
+          </Link>
+          <Link href="/admin/brands" className="btn-outline">
+            Бренды
           </Link>
           <Link href="/admin/products/new" className="btn-primary">
             Добавить товар
@@ -102,6 +116,22 @@ export function ProductsAdminClient({
           </select>
         </label>
         <label className="admin-field">
+          <span>Бренд</span>
+          <select
+            className="input-field"
+            value={brandFilter}
+            onChange={(e) => setBrandFilter(e.target.value)}
+          >
+            <option value="all">Все бренды</option>
+            <option value="none">Без бренда</option>
+            {brands.map((brand) => (
+              <option key={brand.id} value={brand.id}>
+                {brand.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="admin-field">
           <span>Статус</span>
           <select
             className="input-field"
@@ -130,6 +160,7 @@ export function ProductsAdminClient({
               <tr>
                 <th>Товар</th>
                 <th>Категория</th>
+                <th>Бренд</th>
                 <th>Цена</th>
                 <th>Метки</th>
                 <th>Статус</th>
@@ -154,6 +185,7 @@ export function ProductsAdminClient({
                     </Link>
                   </td>
                   <td className="text-muted">{p.category.name}</td>
+                  <td className="text-muted">{p.brand?.name || "—"}</td>
                   <td className="font-semibold text-navy">{formatPrice(p.price)}</td>
                   <td>
                     <div className="admin-flag-row">

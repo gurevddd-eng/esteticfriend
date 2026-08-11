@@ -10,7 +10,7 @@ const RELATED = [
   { href: "/admin/slides", title: "Слайды", text: "Карусель акций" },
   { href: "/admin/promos", title: "Промо", text: "Баннеры под слайдером" },
   { href: "/admin/faq", title: "FAQ", text: "Частые вопросы" },
-  { href: "/admin/brands", title: "Бренды", text: "Партнёры" },
+  { href: "/admin/brands", title: "Бренды", text: "Раздел /brands и привязка к товарам" },
   { href: "/admin/advantages", title: "Преимущества", text: "Почему выбирают" },
 ] as const;
 

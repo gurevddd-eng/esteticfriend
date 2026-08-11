@@ -64,6 +64,7 @@ export async function saveProduct(
     name: string;
     slug?: string;
     categoryId: string;
+    brandId?: string | null;
     shortDesc?: string;
     description?: string;
     imageUrl?: string;
@@ -93,6 +94,7 @@ export async function saveProduct(
     name: input.name.trim(),
     slug,
     categoryId: input.categoryId,
+    brandId: input.brandId?.trim() ? input.brandId.trim() : null,
     shortDesc: input.shortDesc?.trim() || "",
     description: input.description?.trim() || "",
     imageUrl: input.imageUrl?.trim() || null,
@@ -109,6 +111,7 @@ export async function saveProduct(
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/${id}`);
     revalidatePath("/catalog");
+    revalidatePath("/brands");
     revalidatePath("/");
     return { ok: true as const, id };
   }
@@ -117,6 +120,7 @@ export async function saveProduct(
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${created.id}`);
   revalidatePath("/catalog");
+  revalidatePath("/brands");
   revalidatePath("/");
   return { ok: true as const, id: created.id };
 }
@@ -305,12 +309,20 @@ export async function deleteFaq(id: string) {
 }
 
 export async function saveBrand(
-  input: { name: string; sortOrder?: number; isActive?: boolean },
+  input: {
+    name: string;
+    slug?: string;
+    description?: string;
+    sortOrder?: number;
+    isActive?: boolean;
+  },
   id?: string,
 ) {
   await assertAdmin();
   const data = {
     name: input.name.trim(),
+    slug: input.slug?.trim() || slugify(input.name),
+    description: input.description?.trim() || "",
     sortOrder: input.sortOrder ?? 0,
     isActive: input.isActive ?? true,
   };
@@ -320,14 +332,56 @@ export async function saveBrand(
     await prisma.brand.create({ data });
   }
   revalidatePath("/");
+  revalidatePath("/brands");
   revalidatePath("/admin/brands");
+  revalidatePath("/catalog");
   return { ok: true as const };
 }
 
 export async function deleteBrand(id: string) {
   await assertAdmin();
+  const count = await prisma.product.count({ where: { brandId: id } });
+  if (count > 0) {
+    return {
+      ok: false as const,
+      error: "Сначала отвяжите или перенесите товары этого бренда",
+    };
+  }
   await prisma.brand.delete({ where: { id } });
   revalidatePath("/");
+  revalidatePath("/brands");
+  revalidatePath("/admin/brands");
+  return { ok: true as const };
+}
+
+export async function saveBrandsSectionContent(input: {
+  kicker: string;
+  title: string;
+  lead: string;
+  cta: string;
+  ctaHref: string;
+  isEnabled: boolean;
+}) {
+  await assertAdmin();
+  const pairs: Array<[string, string]> = [
+    ["brandsKicker", input.kicker.trim()],
+    ["brandsTitle", input.title.trim()],
+    ["brandsLead", input.lead.trim()],
+    ["brandsCta", input.cta.trim()],
+    ["brandsCtaHref", input.ctaHref.trim()],
+    ["brandsSectionEnabled", input.isEnabled ? "1" : "0"],
+  ];
+
+  for (const [key, value] of pairs) {
+    await prisma.siteSetting.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value },
+    });
+  }
+
+  revalidatePath("/");
+  revalidatePath("/brands");
   revalidatePath("/admin/brands");
   return { ok: true as const };
 }

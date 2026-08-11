@@ -97,3 +97,12 @@ export function IconCompare({ size, className }: IconProps) {
     </IconShell>
   );
 }
+
+export function IconSearch({ size, className }: IconProps) {
+  return (
+    <IconShell size={size} className={className}>
+      <circle cx="11" cy="11" r="5.75" />
+      <path d="M16.25 16.25 20.5 20.5" />
+    </IconShell>
+  );
+}

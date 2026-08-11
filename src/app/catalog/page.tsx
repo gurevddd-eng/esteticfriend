@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SITE } from "@/lib/content";
 import { CatalogFilters } from "@/components/CatalogFilters";
-import { ProductCard } from "@/components/ProductCard";
+import { CatalogProductGrid } from "@/components/CatalogProductGrid";
 import { getCategories, getProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = {
@@ -27,11 +27,7 @@ export default async function CatalogPage() {
 
       <CatalogFilters categories={categories} />
 
-      <div className="catalog-grid">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      <CatalogProductGrid products={products} />
     </div>
   );
 }

@@ -8,3 +8,10 @@ export function formatPrice(value: number | string | { toString(): string } | nu
     maximumFractionDigits: 0,
   }).format(num);
 }
+
+export function formatPhoneShort(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length < 10) return phone;
+  const local = digits.slice(-10);
+  return `${local.slice(0, 3)}-${local.slice(3, 6)}-${local.slice(6)}`;
+}

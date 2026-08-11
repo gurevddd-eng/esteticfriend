@@ -12,6 +12,7 @@ import {
 } from "../src/lib/content";
 import { DEFAULT_CONTACT_WIDGET } from "../src/lib/contact-widget";
 import { PRODUCT_COMPARE_AT_META } from "../src/lib/product-sort";
+import { slugify } from "../src/lib/slugify";
 
 const prisma = new PrismaClient();
 
@@ -46,11 +47,43 @@ async function main() {
     categoryIdMap.set(cat.id, saved.id);
   }
 
+  const brandIdMap = new Map<string, string>();
+
+  for (const [index, name] of BRANDS.entries()) {
+    const slug = slugify(name);
+    const saved = await prisma.brand.upsert({
+      where: { slug },
+      update: {
+        name,
+        sortOrder: index,
+        isActive: true,
+      },
+      create: {
+        slug,
+        name,
+        sortOrder: index,
+        isActive: true,
+      },
+    });
+    brandIdMap.set(name.toLowerCase(), saved.id);
+  }
+
+  function detectBrandId(productName: string) {
+    const lower = productName.toLowerCase();
+    for (const name of BRANDS) {
+      if (lower.includes(name.toLowerCase())) {
+        return brandIdMap.get(name.toLowerCase()) ?? null;
+      }
+    }
+    return null;
+  }
+
   for (const product of FALLBACK_PRODUCTS) {
     const categoryId = categoryIdMap.get(product.categoryId);
     if (!categoryId) continue;
 
     const compareAtPrice = PRODUCT_COMPARE_AT_META[product.slug] ?? null;
+    const brandId = detectBrandId(product.name);
 
     await prisma.product.upsert({
       where: { slug: product.slug },
@@ -66,6 +99,7 @@ async function main() {
         isHit: product.isHit,
         isActive: true,
         categoryId,
+        brandId,
       },
       create: {
         slug: product.slug,
@@ -80,6 +114,7 @@ async function main() {
         isHit: product.isHit,
         isActive: true,
         categoryId,
+        brandId,
       },
     });
   }
@@ -90,17 +125,6 @@ async function main() {
       data: FAQ_ITEMS.map((item, index) => ({
         question: item.question,
         answer: item.answer,
-        sortOrder: index,
-        isActive: true,
-      })),
-    });
-  }
-
-  const brandCount = await prisma.brand.count();
-  if (brandCount === 0) {
-    await prisma.brand.createMany({
-      data: BRANDS.map((name, index) => ({
-        name,
         sortOrder: index,
         isActive: true,
       })),
@@ -241,7 +265,16 @@ async function main() {
     ],
     ["heroCtaPrimary", "Перейти в каталог"],
     ["heroCtaSecondary", "Получить консультацию"],
-    ["faviconUrl", "/brand/sevens.ico"],
+    ["brandsKicker", "Партнёры"],
+    ["brandsTitle", "Письма о полномочиях"],
+    [
+      "brandsLead",
+      "Работаем с проверенными заводами и по запросу предоставляем документы на оборудование.",
+    ],
+    ["brandsCta", "Смотреть сертификаты"],
+    ["brandsCtaHref", "/certificates"],
+    ["brandsSectionEnabled", "1"],
+    ["faviconUrl", "/brand/favicon.svg"],
     ["contactWidget", JSON.stringify(DEFAULT_CONTACT_WIDGET)],
   ];
 

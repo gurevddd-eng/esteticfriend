@@ -7,6 +7,15 @@ export type CategoryDTO = {
   _count?: { products: number };
 };
 
+export type BrandDTO = {
+  id: string;
+  slug: string;
+  name: string;
+  description?: string;
+  sortOrder: number;
+  _count?: { products: number };
+};
+
 export type ProductDTO = {
   id: string;
   slug: string;
@@ -15,11 +24,14 @@ export type ProductDTO = {
   description: string;
   imageUrl: string | null;
   price: number | null;
+  compareAtPrice?: number | null;
   inStock: boolean;
   isNew: boolean;
   isHit: boolean;
   categoryId: string;
   category?: Pick<CategoryDTO, "id" | "slug" | "name">;
+  brandId?: string | null;
+  brand?: Pick<BrandDTO, "id" | "slug" | "name"> | null;
 };
 
 export const SITE = {
@@ -72,8 +84,9 @@ export const ADVANTAGES = [
 
 export const NAV_LINKS = [
   { href: "/catalog", label: "Каталог" },
-  { href: "/delivery", label: "Доставка и оплата" },
+  { href: "/delivery", label: "Доставка и оплата", shortLabel: "Доставка" },
   { href: "/warranty", label: "Гарантия" },
+  { href: "/brands", label: "Бренды" },
   { href: "/certificates", label: "Сертификаты" },
   { href: "/training", label: "Обучение" },
   { href: "/contacts", label: "Контакты" },
