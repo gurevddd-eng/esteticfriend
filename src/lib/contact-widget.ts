@@ -32,23 +32,13 @@ export const DEFAULT_CONTACT_WIDGET: ContactWidgetConfig = {
     "Опишите вопрос — специалист ответит и поможет с подбором оборудования.",
   channels: [
     {
-      id: "chat",
-      label: "Чат на сайте",
-      kind: "chat",
-      href: "",
-      iconPreset: "chat",
-      iconUrl: null,
-      sortOrder: 0,
-      isActive: true,
-    },
-    {
       id: "max",
       label: "Макс",
       kind: "link",
       href: "https://max.ru",
       iconPreset: "max",
       iconUrl: null,
-      sortOrder: 1,
+      sortOrder: 0,
       isActive: true,
     },
     {
@@ -58,7 +48,7 @@ export const DEFAULT_CONTACT_WIDGET: ContactWidgetConfig = {
       href: "https://t.me/sevens",
       iconPreset: "telegram",
       iconUrl: null,
-      sortOrder: 2,
+      sortOrder: 1,
       isActive: true,
     },
   ],
@@ -135,5 +125,5 @@ export function parseContactWidgetConfig(raw: string | undefined | null): Contac
 }
 
 export function getActiveContactChannels(config: ContactWidgetConfig) {
-  return config.channels.filter((channel) => channel.isActive);
+  return config.channels.filter((channel) => channel.isActive && channel.kind !== "chat");
 }

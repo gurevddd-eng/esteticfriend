@@ -36,6 +36,7 @@ export type ProductDTO = {
 
 export const HEADER_LOGO_URL = "/brand/sevens-header-logo.png";
 export const HEADER_WORDMARK_URL = "/brand/sevens-wordmark.png";
+export const FOOTER_WORDMARK_URL = "/brand/sevens-wordmark-original.png";
 
 export const BRAND_TAGLINE_LINES = [
   "Косметологическое и медицинское",

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BrandLogo } from "@/components/BrandLogo";
+import { FooterBrandLockup } from "@/components/FooterBrandLockup";
 import type { SiteInfo } from "@/lib/catalog";
 import type { CategoryDTO } from "@/lib/content";
 
@@ -24,7 +24,7 @@ export function Footer({
     <footer className="site-footer">
       <div className="site-footer__main">
         <div className="site-footer__brand-col">
-          <BrandLogo size="lg" tone="dark" className="site-footer__logo" logoUrl={site.logoUrl} />
+          <FooterBrandLockup className="site-footer__logo" logoUrl={site.logoUrl} />
           <p className="site-footer__tagline">
             {site.tagline ||
               "Профессиональное косметическое оборудование для салонов и клиник."}
