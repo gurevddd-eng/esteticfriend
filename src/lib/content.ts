@@ -34,6 +34,16 @@ export type ProductDTO = {
   brand?: Pick<BrandDTO, "id" | "slug" | "name"> | null;
 };
 
+export const HEADER_LOGO_URL = "/brand/sevens-header-logo.png";
+export const HEADER_WORDMARK_URL = "/brand/sevens-wordmark.png";
+
+export const BRAND_TAGLINE_LINES = [
+  "Косметологическое и медицинское",
+  "оборудование",
+] as const;
+
+export const BRAND_TAGLINE = "Косметологическое и медицинское оборудование";
+
 export const SITE = {
   name: "SEVENS",
   phone: "+7 (911) 929-77-47",

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
-import { BrandLogo } from "@/components/BrandLogo";
+import { HeaderBrandLockup } from "@/components/HeaderBrandLockup";
 import { CallbackModal } from "@/components/CallbackModal";
 import { HeaderSearch } from "@/components/HeaderSearch";
 import { useCart } from "@/components/CartProvider";
@@ -105,7 +105,7 @@ export function Header({
       <header className={`site-header${catalogOpen ? " is-catalog-open" : ""}`}>
         <div className="site-header__bar">
           <div className="site-header__start">
-            <BrandLogo size="lg" className="site-header__brand" logoUrl={site.logoUrl} />
+            <HeaderBrandLockup className="site-header__brand" logoUrl={site.logoUrl} />
             <HeaderSearch />
           </div>
 
@@ -255,7 +255,7 @@ export function Header({
           <div className="mobile-drawer__head">
             <div>
               <div onClick={closeMenu}>
-                <BrandLogo size="md" logoUrl={site.logoUrl} />
+                <HeaderBrandLockup logoUrl={site.logoUrl} compact />
               </div>
               <a href={site.phoneHref} className="mobile-drawer__head-phone">
                 {site.phone}

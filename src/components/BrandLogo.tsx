@@ -9,6 +9,7 @@ const SIZES = {
 } as const;
 
 const IMAGE_SIZES = {
+  header: "brand-logo__img--header",
   sm: "brand-logo__img--sm",
   md: "brand-logo__img--md",
   lg: "brand-logo__img--lg",
@@ -24,7 +25,7 @@ export function BrandLogo({
 }: {
   href?: string;
   className?: string;
-  size?: keyof typeof SIZES;
+  size?: keyof typeof SIZES | "header";
   tone?: "light" | "dark";
   logoUrl?: string | null;
 }) {
