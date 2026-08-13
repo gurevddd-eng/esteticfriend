@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { ContactWidgetConfig } from "@/lib/contact-widget";
 import { ContactChooserModal } from "@/components/ContactChooserModal";
-import { isScrollRestoring } from "@/hooks/useBodyScrollLock";
 
 const SCROLL_ROTATE = 0.24;
 
 export function AskQuestionFab({ contactWidget }: { contactWidget: ContactWidgetConfig }) {
   const circleId = useId().replace(/:/g, "");
+  const ringRef = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
-  const [rotation, setRotation] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const [motionReduced, setMotionReduced] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     setMotionReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
@@ -23,11 +25,14 @@ export function AskQuestionFab({ contactWidget }: { contactWidget: ContactWidget
     let frame = 0;
 
     const update = () => {
-      if (document.body.dataset.scrollLocked === "true" || isScrollRestoring()) {
+      if (document.body.dataset.scrollLocked === "true") {
         frame = 0;
         return;
       }
-      setRotation(window.scrollY * SCROLL_ROTATE);
+      ringRef.current?.style.setProperty(
+        "--ask-fab-rotation",
+        `${window.scrollY * SCROLL_ROTATE}deg`,
+      );
       frame = 0;
     };
 
@@ -44,7 +49,7 @@ export function AskQuestionFab({ contactWidget }: { contactWidget: ContactWidget
     };
   }, [motionReduced]);
 
-  return (
+  const content = (
     <>
       <button
         type="button"
@@ -53,8 +58,9 @@ export function AskQuestionFab({ contactWidget }: { contactWidget: ContactWidget
         onClick={() => setOpen(true)}
       >
         <span
+          ref={ringRef}
           className="ask-fab__ring"
-          style={motionReduced ? undefined : { transform: `rotate(${rotation}deg)` }}
+          style={motionReduced ? undefined : { "--ask-fab-rotation": "0deg" }}
           aria-hidden
         >
           <svg viewBox="0 0 100 100" className="ask-fab__ring-svg">
@@ -97,4 +103,8 @@ export function AskQuestionFab({ contactWidget }: { contactWidget: ContactWidget
       />
     </>
   );
+
+  if (!mounted) return null;
+
+  return createPortal(content, document.body);
 }
