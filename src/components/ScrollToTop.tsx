@@ -2,12 +2,17 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { isScrollRestoring } from "@/hooks/useBodyScrollLock";
+import { createPortal } from "react-dom";
 
 export function ScrollToTop() {
   const [visible, setVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -25,7 +30,7 @@ export function ScrollToTop() {
     };
 
     const onScroll = () => {
-      if (document.body.dataset.scrollLocked === "true" || isScrollRestoring()) return;
+      if (document.body.dataset.scrollLocked === "true") return;
 
       const y = window.scrollY;
       const goingUp = y < lastY - 1;
@@ -57,7 +62,9 @@ export function ScrollToTop() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [pathname, router]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <button
       type="button"
       className={`scroll-top${visible ? " is-visible" : ""}`}
@@ -85,6 +92,7 @@ export function ScrollToTop() {
         <path d="M12 19V5" />
         <path d="m6.5 10.5 5.5-5.5 5.5 5.5" />
       </svg>
-    </button>
+    </button>,
+    document.body,
   );
 }

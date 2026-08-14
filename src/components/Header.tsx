@@ -253,8 +253,8 @@ export function Header({
           inert={!menuOpen ? true : undefined}
         >
           <div className="mobile-drawer__head">
-            <div>
-              <div onClick={closeMenu}>
+            <div className="mobile-drawer__head-brand">
+              <div className="mobile-drawer__head-logo" onClick={closeMenu}>
                 <HeaderBrandLockup logoUrl={site.logoUrl} compact />
               </div>
               <a href={site.phoneHref} className="mobile-drawer__head-phone">
@@ -263,7 +263,7 @@ export function Header({
             </div>
             <button
               type="button"
-              className="site-header__icon"
+              className="site-header__icon mobile-drawer__head-close"
               aria-label="Закрыть меню"
               onClick={closeMenu}
             >
