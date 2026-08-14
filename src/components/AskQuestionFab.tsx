@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import type { ContactWidgetConfig } from "@/lib/contact-widget";
 import { ContactChooserModal } from "@/components/ContactChooserModal";
@@ -60,7 +60,11 @@ export function AskQuestionFab({ contactWidget }: { contactWidget: ContactWidget
         <span
           ref={ringRef}
           className="ask-fab__ring"
-          style={motionReduced ? undefined : { "--ask-fab-rotation": "0deg" }}
+          style={
+            motionReduced
+              ? undefined
+              : ({ "--ask-fab-rotation": "0deg" } as CSSProperties)
+          }
           aria-hidden
         >
           <svg viewBox="0 0 100 100" className="ask-fab__ring-svg">
