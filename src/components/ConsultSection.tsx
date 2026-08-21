@@ -11,11 +11,19 @@ const CONSULT_SOURCES = {
 } as const;
 
 export function ConsultSection({ site }: { site: SiteInfo }) {
-  const { videoRef, canvasRef, useCanvas, hideVideo, hideCanvas, hidePoster } =
-    useYandexVideoBg(CONSULT_SOURCES);
+  const {
+    setHost,
+    videoRef,
+    canvasRef,
+    useCanvas,
+    active,
+    hideVideo,
+    hideCanvas,
+    hidePoster,
+  } = useYandexVideoBg(CONSULT_SOURCES, { lazy: true });
 
   return (
-    <section id="consult" className="consult">
+    <section id="consult" className="consult" ref={setHost}>
       <div className="consult__media" aria-hidden>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -23,22 +31,25 @@ export function ConsultSection({ site }: { site: SiteInfo }) {
           alt=""
           className={`consult__poster${hidePoster ? " consult__poster--hidden" : ""}`}
           decoding="async"
+          loading="lazy"
         />
-        <video
-          ref={videoRef}
-          className={`consult__video${hideVideo ? " consult__video--hidden" : ""}`}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster="/about/about-1.webp"
-          disablePictureInPicture
-        >
-          <source src="/about/company.mp4" type="video/mp4" />
-          <source src="/about/company.webm" type="video/webm" />
-        </video>
-        {useCanvas ? (
+        {active ? (
+          <video
+            ref={videoRef}
+            className={`consult__video${hideVideo ? " consult__video--hidden" : ""}`}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/about/about-1.webp"
+            disablePictureInPicture
+          >
+            <source src="/about/company.webm" type="video/webm" />
+            <source src="/about/company.mp4" type="video/mp4" />
+          </video>
+        ) : null}
+        {active && useCanvas ? (
           <canvas
             ref={canvasRef}
             className={`consult__canvas${hideCanvas ? " consult__canvas--pending" : ""}`}

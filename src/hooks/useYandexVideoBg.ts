@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 
 export function isYandexBrowser() {
   if (typeof navigator === "undefined") return false;
@@ -24,93 +24,147 @@ type Sources = {
   mp4: string;
 };
 
+type Options = {
+  /** Delay media start until the host element is near the viewport. */
+  lazy?: boolean;
+};
+
 /**
  * Background video.
- * Mobile → native <video>, object-fit: contain in a dedicated band.
- * Desktop → canvas mirror (Chrome/Yandex scroll glitch workaround).
+ * - Mobile / normal desktop → native `<video>` (cheap)
+ * - Yandex desktop → canvas mirror (scroll glitch workaround)
+ * Pauses when off-screen or tab hidden.
  */
-export function useYandexVideoBg(sources: Sources) {
+export function useYandexVideoBg(sources: Sources, options: Options = {}) {
+  const { lazy = false } = options;
+  const hostRef = useRef<HTMLElement | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [profile, setProfile] = useState<"pending" | "native" | "canvas">(
+    "pending",
+  );
+  const [active, setActive] = useState(!lazy);
   const [hasFrame, setHasFrame] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
 
   useEffect(() => {
-    setIsMobile(isMobileUa());
+    const yandex = isYandexBrowser();
+    const mobile = isMobileUa();
+    setProfile(yandex && !mobile ? "canvas" : "native");
   }, []);
 
-  const useNativeVideo = isMobile;
-  const useCanvas = !isMobile;
+  useEffect(() => {
+    if (!lazy) {
+      setActive(true);
+      return;
+    }
+    const host = hostRef.current;
+    if (!host || typeof IntersectionObserver === "undefined") {
+      setActive(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setActive(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "240px 0px" },
+    );
+    io.observe(host);
+    return () => io.disconnect();
+  }, [lazy]);
+
+  const useCanvas = profile === "canvas";
+  const useNativeVideo = profile === "native";
 
   useEffect(() => {
+    if (!active || profile === "pending") return;
     const video = videoRef.current;
     if (!video) return;
 
     let cancelled = false;
+    let objectUrl: string | null = null;
+    let raf = 0;
+    let framed = false;
+    let inView = true;
+    let pageVisible = document.visibilityState === "visible";
 
     const softPlay = () => {
-      if (cancelled || document.hidden) return;
+      if (cancelled || !pageVisible || !inView) return;
       video.muted = true;
       video.defaultMuted = true;
       void video.play().catch(() => undefined);
     };
 
-    if (useNativeVideo) {
-      video.muted = true;
-      video.defaultMuted = true;
-      video.loop = true;
-      video.playsInline = true;
-      video.preload = "auto";
-      video.setAttribute("muted", "");
-      video.setAttribute("playsinline", "");
-      video.setAttribute("webkit-playsinline", "");
+    const softPause = () => {
+      try {
+        video.pause();
+      } catch {
+        /* ignore */
+      }
+    };
 
-      const onReady = () => {
-        if (video.readyState >= 2) setVideoReady(true);
-        softPlay();
-      };
+    const syncPlayback = () => {
+      if (pageVisible && inView) softPlay();
+      else softPause();
+    };
 
-      video.addEventListener("canplay", onReady);
-      video.addEventListener("loadeddata", onReady);
-      video.addEventListener("playing", onReady);
+    video.muted = true;
+    video.defaultMuted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+
+    const onReady = () => {
+      if (video.readyState >= 2) setVideoReady(true);
       softPlay();
+    };
 
-      const onVisibility = () => {
-        if (document.visibilityState === "visible") softPlay();
-        else {
-          try {
-            video.pause();
-          } catch {
-            /* ignore */
+    video.addEventListener("canplay", onReady);
+    video.addEventListener("loadeddata", onReady);
+    video.addEventListener("playing", onReady);
+
+    const onVisibility = () => {
+      pageVisible = document.visibilityState === "visible";
+      syncPlayback();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    const host = hostRef.current ?? video.parentElement;
+    let io: IntersectionObserver | null = null;
+    if (host && typeof IntersectionObserver !== "undefined") {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          inView = Boolean(entry?.isIntersecting);
+          syncPlayback();
+          if (useCanvas) {
+            if (inView && pageVisible) startCanvasMirror();
+            else stopCanvasMirror();
           }
-        }
-      };
-      document.addEventListener("visibilitychange", onVisibility);
-
-      return () => {
-        cancelled = true;
-        video.removeEventListener("canplay", onReady);
-        video.removeEventListener("loadeddata", onReady);
-        video.removeEventListener("playing", onReady);
-        document.removeEventListener("visibilitychange", onVisibility);
-      };
+        },
+        { threshold: 0.08 },
+      );
+      io.observe(host);
     }
 
-    if (!useCanvas) return;
-    let objectUrl: string | null = null;
-    let raf = 0;
-    let framed = false;
     let drawing = false;
 
     const drawOnce = () => {
       const canvas = canvasRef.current;
-      const ctx = canvas?.getContext("2d", { alpha: false });
+      const ctx = canvas?.getContext("2d", {
+        alpha: false,
+        desynchronized: true,
+      });
       if (!canvas || !ctx) return false;
       if (video.readyState < 2 || video.videoWidth <= 0) return false;
 
       const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const cw = Math.max(1, Math.round(rect.width * dpr));
       const ch = Math.max(1, Math.round(rect.height * dpr));
       if (canvas.width !== cw || canvas.height !== ch) {
@@ -132,32 +186,29 @@ export function useYandexVideoBg(sources: Sources) {
     };
 
     const loop = () => {
-      if (cancelled) return;
-      if (!document.hidden) drawOnce();
+      if (cancelled || !drawing) return;
+      if (pageVisible && inView) drawOnce();
       raf = window.requestAnimationFrame(loop);
     };
 
     const startCanvasMirror = () => {
-      if (drawing) return;
+      if (!useCanvas || drawing) return;
       drawing = true;
       raf = window.requestAnimationFrame(loop);
     };
 
-    const setup = async () => {
-      video.muted = true;
-      video.defaultMuted = true;
-      video.loop = true;
-      video.playsInline = true;
-      video.preload = "auto";
-      video.setAttribute("muted", "");
-      video.setAttribute("playsinline", "");
-      video.setAttribute("webkit-playsinline", "");
+    const stopCanvasMirror = () => {
+      drawing = false;
+      if (raf) window.cancelAnimationFrame(raf);
+      raf = 0;
+    };
 
-      // Blob URL helps Yandex; also avoids some Chrome range-request glitches.
-      if (isYandexBrowser()) {
+    const setup = async () => {
+      if (useCanvas) {
+        // Blob URL helps Yandex range-request / scroll issues.
         const order = [
-          [sources.mp4, "video/mp4"],
           [sources.webm, "video/webm"],
+          [sources.mp4, "video/mp4"],
         ] as const;
 
         for (const [url, mime] of order) {
@@ -177,58 +228,40 @@ export function useYandexVideoBg(sources: Sources) {
           video.src = objectUrl;
           video.load();
         }
+        startCanvasMirror();
       }
 
-      startCanvasMirror();
       softPlay();
     };
-
-    const onCanPlay = () => softPlay();
-    const onPlaying = () => {
-      drawOnce();
-      softPlay();
-    };
-
-    video.addEventListener("canplay", onCanPlay);
-    video.addEventListener("loadeddata", onCanPlay);
-    video.addEventListener("loadedmetadata", onCanPlay);
-    video.addEventListener("playing", onPlaying);
-
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") softPlay();
-      else {
-        try {
-          video.pause();
-        } catch {
-          /* ignore */
-        }
-      }
-    };
-    document.addEventListener("visibilitychange", onVisibility);
 
     void setup();
 
     return () => {
       cancelled = true;
-      window.cancelAnimationFrame(raf);
-      video.removeEventListener("canplay", onCanPlay);
-      video.removeEventListener("loadeddata", onCanPlay);
-      video.removeEventListener("loadedmetadata", onCanPlay);
-      video.removeEventListener("playing", onPlaying);
+      stopCanvasMirror();
+      io?.disconnect();
+      video.removeEventListener("canplay", onReady);
+      video.removeEventListener("loadeddata", onReady);
+      video.removeEventListener("playing", onReady);
       document.removeEventListener("visibilitychange", onVisibility);
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [useCanvas, useNativeVideo, sources.mp4, sources.webm]);
+  }, [active, profile, useCanvas, sources.mp4, sources.webm]);
 
-  const hideVideo = !useNativeVideo;
+  const hideVideo = useCanvas;
   const hideCanvas = !useCanvas || !hasFrame;
-  const hidePoster = useNativeVideo && videoReady;
+  const hidePoster = videoReady && (useNativeVideo || hasFrame);
 
   return {
+    hostRef: hostRef as RefObject<HTMLElement | null>,
+    setHost: (el: HTMLElement | null) => {
+      hostRef.current = el;
+    },
     videoRef,
     canvasRef,
     useNativeVideo,
     useCanvas,
+    active,
     hasFrame,
     videoReady,
     hideVideo,

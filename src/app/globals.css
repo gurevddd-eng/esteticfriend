@@ -81,14 +81,14 @@ a {
 }
 
 .site-header {
-  --header-glass: rgba(255, 252, 247, 0.92);
+  --header-glass: rgba(255, 252, 247, 0.94);
   position: sticky;
   top: 0;
   z-index: 50;
   background: var(--header-glass);
   border-bottom: 1px solid var(--line);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .site-header.is-catalog-open {
@@ -1864,7 +1864,6 @@ a {
   border-radius: 1.5rem;
   background: transparent;
   box-shadow: 0 22px 50px rgba(53, 68, 89, 0.14);
-  animation: advantages-float 9s ease-in-out infinite alternate;
 }
 
 .advantages-intro__media img {
@@ -1872,15 +1871,6 @@ a {
   /* сильнее подрезаем светлую маску по углам исходного PNG */
   transform: scale(1.14);
   object-position: center 40%;
-}
-
-@keyframes advantages-float {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-8px);
-  }
 }
 
 @media (min-width: 1024px) {
@@ -1892,12 +1882,6 @@ a {
   .advantages-intro__media {
     aspect-ratio: 5 / 4;
     border-radius: 1.75rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .advantages-intro__media {
-    animation: none;
   }
 }
 
@@ -2384,6 +2368,8 @@ a.contact-sheet__option {
   padding-block: clamp(4rem, 8vw, 6.5rem);
   padding-inline: var(--page-gutter);
   background: var(--mist);
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 720px;
 }
 
 @media (max-width: 640px) {
@@ -2513,6 +2499,8 @@ a.contact-sheet__option {
   padding-inline: var(--page-gutter);
   background: var(--pearl);
   border-block: 1px solid var(--line);
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 640px;
 }
 
 .faq-section__layout {
@@ -3218,6 +3206,8 @@ a.contact-sheet__option {
       var(--pearl) 100%
     );
   border-block: 1px solid var(--line);
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 520px;
 }
 
 .category-showcase__head {
@@ -3324,6 +3314,8 @@ a.contact-sheet__option {
     ),
     linear-gradient(145deg, var(--navy-deep) 0%, var(--navy) 100%);
   color: var(--pearl);
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 480px;
 }
 
 .brands-section__kicker {
@@ -3994,6 +3986,8 @@ a.contact-sheet__option {
   background:
     linear-gradient(180deg, var(--pearl) 0%, var(--mist) 100%);
   border-top: 1px solid var(--line);
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 420px;
 }
 
 .company-video__head {

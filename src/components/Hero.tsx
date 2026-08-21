@@ -11,11 +11,18 @@ const HERO_SOURCES = {
 } as const;
 
 export function Hero({ site }: { site: SiteInfo }) {
-  const { videoRef, canvasRef, useCanvas, hideVideo, hideCanvas, hidePoster } =
-    useYandexVideoBg(HERO_SOURCES);
+  const {
+    setHost,
+    videoRef,
+    canvasRef,
+    useCanvas,
+    hideVideo,
+    hideCanvas,
+    hidePoster,
+  } = useYandexVideoBg(HERO_SOURCES);
 
   return (
-    <section className="hero">
+    <section className="hero" ref={setHost}>
       <div className="hero__media" aria-hidden>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -32,12 +39,12 @@ export function Hero({ site }: { site: SiteInfo }) {
           muted
           loop
           playsInline
-          preload="auto"
+          preload="metadata"
           poster="/hero/poster.webp"
           disablePictureInPicture
         >
-          <source src="/hero/main.mp4" type="video/mp4" />
           <source src="/hero/main.webm" type="video/webm" />
+          <source src="/hero/main.mp4" type="video/mp4" />
         </video>
         {useCanvas ? (
           <canvas
