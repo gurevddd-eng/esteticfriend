@@ -87,11 +87,6 @@ export function AdminShell({
           </button>
         </div>
 
-        <div className="admin-sidebar__pulse">
-          <span className="admin-sidebar__dot" />
-          Система онлайн
-        </div>
-
         <nav className="admin-sidebar__nav" aria-label="Разделы">
           {ADMIN_SECTIONS.map((section) => (
             <div key={section.id} className="admin-nav-section">
@@ -107,7 +102,7 @@ export function AdminShell({
                         aria-current={active ? "page" : undefined}
                       >
                         <AdminNavIcon href={item.href} />
-                        <span>{item.label}</span>
+                        <span className="admin-nav-link__label">{item.label}</span>
                       </Link>
                     </li>
                   );
@@ -118,6 +113,10 @@ export function AdminShell({
         </nav>
 
         <div className="admin-sidebar__foot">
+          <div className="admin-sidebar__pulse" title="Приложение запущено">
+            <span className="admin-sidebar__dot" />
+            Онлайн
+          </div>
           {email ? (
             <div className="admin-sidebar__user">
               <span className="admin-sidebar__avatar" aria-hidden>
@@ -125,13 +124,15 @@ export function AdminShell({
               </span>
               <div className="admin-sidebar__user-meta">
                 <p className="admin-sidebar__user-label">Администратор</p>
-                <p className="admin-sidebar__email">{email}</p>
+                <p className="admin-sidebar__email" title={email}>
+                  {email}
+                </p>
               </div>
             </div>
           ) : null}
           <div className="admin-sidebar__actions">
-            <Link href="/" className="admin-sidebar__ghost" target="_blank">
-              Сайт
+            <Link href="/" className="admin-sidebar__ghost" target="_blank" rel="noreferrer">
+              Сайт ↗
             </Link>
             <button
               type="button"
@@ -139,7 +140,7 @@ export function AdminShell({
               disabled={logoutPending}
               onClick={onLogout}
             >
-              {logoutPending ? "Выход..." : "Выйти"}
+              {logoutPending ? "Выход…" : "Выйти"}
             </button>
           </div>
         </div>
@@ -167,8 +168,8 @@ export function AdminShell({
           <time className="admin-topbar__clock" dateTime={now.toISOString()}>
             {clock}
           </time>
-          <Link href="/" className="admin-topbar__site" target="_blank">
-            Открыть сайт
+          <Link href="/" className="admin-topbar__site" target="_blank" rel="noreferrer">
+            Сайт ↗
           </Link>
         </header>
         <div className="admin-main">

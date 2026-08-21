@@ -285,7 +285,9 @@ export function DashboardClient({ stats }: { stats: DashboardStats }) {
   const shortcuts = [
     { href: "/admin/leads", title: "Разбор заявок", text: `${stats.kpis.leads} всего` },
     { href: "/admin/products/new", title: "Новый товар", text: "Добавить аппарат" },
+    { href: "/admin/certificates", title: "Сертификаты", text: "Документы на сайте" },
     { href: "/admin/home", title: "Герой", text: "Первый экран" },
+    { href: "/admin/brands", title: "Бренды", text: "Производители" },
     { href: "/admin/settings", title: "Контакты", text: "Телефон и email" },
   ];
 

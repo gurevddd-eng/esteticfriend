@@ -128,7 +128,7 @@ export function CertificatesAdminClient({
         </div>
       </header>
 
-      <section className="admin-settings-card" style={{ marginBottom: "1.5rem" }}>
+      <section className="admin-settings-card">
         <div className="admin-settings-card__head">
           <p className="admin-settings-card__eyebrow">Страница</p>
           <h2 className="admin-settings-card__title">Тексты /certificates</h2>
