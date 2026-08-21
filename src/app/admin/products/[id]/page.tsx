@@ -32,6 +32,9 @@ export default async function EditProductPage({ params }: Props) {
         brandId: product.brandId,
         shortDesc: product.shortDesc,
         description: product.description,
+        specs: product.specs,
+        kit: product.kit,
+        advantages: product.advantages,
         imageUrl: product.imageUrl,
         price: product.price === null ? null : Number(product.price),
         compareAtPrice:

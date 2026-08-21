@@ -55,9 +55,9 @@ export function LeadForm({
 
   if (status === "ok") {
     return (
-      <div className="page-empty !mt-0 !border-b-0 !pt-0">
-        <h2 className="page-empty__title">Заявка отправлена</h2>
-        <p className="page-empty__text">
+      <div className="lead-form-success">
+        <h2 className="page-form__title">Заявка отправлена</h2>
+        <p className="page-form__lead">
           Мы свяжемся с вами в ближайшее время и подберём оборудование.
         </p>
       </div>

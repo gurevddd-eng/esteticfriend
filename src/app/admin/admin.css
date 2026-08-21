@@ -1385,6 +1385,39 @@
   min-height: 14rem;
 }
 
+.admin-spec-rows {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.55rem;
+}
+
+.admin-spec-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) auto;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.admin-spec-row__remove {
+  min-height: 2.75rem;
+  white-space: nowrap;
+}
+
+.admin-spec-rows__add {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .admin-spec-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-spec-row__remove {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .admin-product-drop {
   display: grid;
   place-items: center;

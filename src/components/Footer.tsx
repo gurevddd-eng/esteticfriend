@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { FooterBrandLockup } from "@/components/FooterBrandLockup";
 import type { SiteInfo } from "@/lib/catalog";
-import type { CategoryDTO } from "@/lib/content";
+import { DELIVERY_GEO, type CategoryDTO } from "@/lib/content";
 
 const COMPANY_LINKS = [
   { href: "/delivery", label: "Доставка и оплата" },
   { href: "/warranty", label: "Гарантия" },
+  { href: "/brands", label: "Бренды" },
   { href: "/training", label: "Обучение" },
   { href: "/certificates", label: "Сертификаты" },
   { href: "/contacts", label: "Контакты" },
@@ -74,7 +75,7 @@ export function Footer({
               <span>{site.cities}</span>
             </li>
             <li>
-              <span>Доставка: Россия, СНГ и Китай</span>
+              <span>Доставка: {DELIVERY_GEO}</span>
             </li>
           </ul>
         </div>

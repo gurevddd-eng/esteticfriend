@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { SiteInfo } from "@/lib/catalog";
+import { DELIVERY_GEO } from "@/lib/content";
 
 export function CompanyVideo({ site }: { site: SiteInfo }) {
   const facts = [
     { label: "Офисы", value: site.cities },
-    { label: "Доставка", value: "Россия, СНГ и Китай" },
+    { label: "Доставка", value: DELIVERY_GEO },
     { label: "Сервис", value: "Обучение и ремонт" },
   ];
 

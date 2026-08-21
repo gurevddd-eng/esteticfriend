@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -58,10 +59,10 @@ export function BrandsAdminClient({
     setPending(true);
     setError(null);
     const fd = new FormData(e.currentTarget);
-    await saveBrand(
+    const res = await saveBrand(
       {
         name: String(fd.get("name") || ""),
-        slug: String(fd.get("slug") || ""),
+        slug: String(fd.get("slug") || "") || undefined,
         description: String(fd.get("description") || ""),
         sortOrder: Number(fd.get("sortOrder") || 0),
         isActive: fd.get("isActive") === "on",
@@ -69,6 +70,10 @@ export function BrandsAdminClient({
       editing?.id,
     );
     setPending(false);
+    if (!res.ok) {
+      setError("Ошибка сохранения");
+      return;
+    }
     closeModal();
     router.refresh();
   }
@@ -91,27 +96,115 @@ export function BrandsAdminClient({
     router.refresh();
   }
 
+  const totalProducts = brands.reduce((sum, b) => sum + b._count.products, 0);
+
   return (
     <div className="admin-page">
       <header className="admin-page__head">
         <div>
-          <p className="admin-page__kicker">Главная и каталог</p>
+          <p className="admin-page__kicker">Каталог</p>
           <h1 className="admin-page__title">Бренды</h1>
           <p className="admin-page__lead">
-            Партнёры на главной, страница /brands и привязка к товарам · {brands.length}
+            {brands.length} бренд{brands.length === 1 ? "" : brands.length < 5 ? "а" : "ов"} ·{" "}
+            {totalProducts} товар{totalProducts === 1 ? "" : totalProducts < 5 ? "а" : "ов"} ·
+            привязка к товарам как у категорий
           </p>
         </div>
         <div className="admin-page__actions">
+          <Link href="/admin/products" className="btn-outline">
+            К товарам
+          </Link>
+          <Link href="/admin/categories" className="btn-outline">
+            Категории
+          </Link>
           <button type="button" className="btn-primary" onClick={openCreate}>
             Добавить бренд
           </button>
         </div>
       </header>
 
-      <section className="admin-settings-card">
+      {brands.length === 0 ? (
+        <div className="admin-panel">
+          <p className="admin-empty">Брендов пока нет. Создайте первый.</p>
+        </div>
+      ) : (
+        <div className="admin-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Порядок</th>
+                <th>Название</th>
+                <th>Slug</th>
+                <th>Товары</th>
+                <th>Статус</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {brands.map((brand) => (
+                <tr key={brand.id}>
+                  <td className="text-muted">{brand.sortOrder}</td>
+                  <td>
+                    <p className="font-semibold text-navy">{brand.name}</p>
+                    {brand.description ? (
+                      <p className="mt-1 line-clamp-2 text-sm text-muted">
+                        {brand.description}
+                      </p>
+                    ) : null}
+                  </td>
+                  <td>
+                    <code className="admin-slug">/{brand.slug}</code>
+                  </td>
+                  <td>
+                    <Link
+                      href={`/admin/products?brand=${brand.id}`}
+                      className="font-semibold text-navy underline-offset-2 hover:underline"
+                    >
+                      {brand._count.products}
+                    </Link>
+                  </td>
+                  <td>
+                    <span className={brand.isActive ? "text-navy" : "text-muted"}>
+                      {brand.isActive ? "На сайте" : "Скрыт"}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="admin-item__actions justify-end">
+                      <button
+                        type="button"
+                        className="admin-action-edit"
+                        onClick={() => openEdit(brand)}
+                      >
+                        Изменить
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-action-delete"
+                        onClick={async () => {
+                          if (!confirm(`Удалить бренд «${brand.name}»?`)) return;
+                          const res = await deleteBrand(brand.id);
+                          if (!res.ok) {
+                            alert(res.error || "Не удалось удалить");
+                            return;
+                          }
+                          router.refresh();
+                        }}
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <section className="admin-settings-card mt-8">
         <div className="admin-settings-card__head">
-          <p className="admin-settings-card__eyebrow">Раздел на сайте</p>
-          <h2 className="admin-settings-card__title">Блок брендов и страница /brands</h2>
+          <p className="admin-settings-card__eyebrow">Главная</p>
+          <h2 className="admin-settings-card__title">Блок брендов на сайте</h2>
         </div>
 
         <form onSubmit={onSectionSubmit} className="admin-modal-form">
@@ -178,59 +271,17 @@ export function BrandsAdminClient({
         </form>
       </section>
 
-      {brands.length === 0 ? (
-        <div className="admin-panel">
-          <p className="admin-empty">Список брендов пуст.</p>
-        </div>
-      ) : (
-        <div className="admin-brand-grid">
-          {brands.map((brand) => (
-            <article key={brand.id} className="admin-brand-card">
-              <div>
-                <h2 className="admin-brand-card__name">{brand.name}</h2>
-                <p className="admin-brand-card__meta">
-                  /brands/{brand.slug} · товаров {brand._count.products}
-                  {!brand.isActive ? " · скрыт" : ""}
-                </p>
-                {brand.description ? (
-                  <p className="admin-brand-card__desc">{brand.description}</p>
-                ) : null}
-              </div>
-              <div className="admin-item__actions">
-                <button
-                  type="button"
-                  className="admin-action-edit"
-                  onClick={() => openEdit(brand)}
-                >
-                  Изменить
-                </button>
-                <button
-                  type="button"
-                  className="admin-action-delete"
-                  onClick={async () => {
-                    if (!confirm(`Удалить бренд ${brand.name}?`)) return;
-                    const res = await deleteBrand(brand.id);
-                    if (!res.ok) {
-                      alert(res.error || "Не удалось удалить бренд");
-                      return;
-                    }
-                    router.refresh();
-                  }}
-                >
-                  Удалить
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
-
       <AdminModal
         open={open}
         onClose={closeModal}
         title={editing ? "Редактировать бренд" : "Новый бренд"}
+        description="Бренд привязывается к товарам так же, как категория"
       >
-        <form key={editing?.id || "new"} onSubmit={onSubmit} className="admin-modal-form">
+        <form
+          key={editing?.id || "new"}
+          onSubmit={onSubmit}
+          className="admin-modal-form"
+        >
           <label className="admin-field">
             <span>Название</span>
             <input
@@ -238,25 +289,25 @@ export function BrandsAdminClient({
               required
               className="input-field"
               defaultValue={editing?.name || ""}
+              placeholder="Например, Honkon"
             />
           </label>
           <label className="admin-field">
-            <span>Slug URL</span>
+            <span>Slug</span>
             <input
               name="slug"
               className="input-field"
               defaultValue={editing?.slug || ""}
-              placeholder="honkon"
+              placeholder="Авто из названия, если пусто"
             />
           </label>
           <label className="admin-field">
             <span>Описание</span>
             <textarea
               name="description"
-              className="input-field"
-              rows={3}
+              className="input-field min-h-24"
               defaultValue={editing?.description || ""}
-              placeholder="Кратко о бренде для страницы /brands"
+              placeholder="Кратко о бренде"
             />
           </label>
           <label className="admin-field">
@@ -269,7 +320,11 @@ export function BrandsAdminClient({
             />
           </label>
           <label className="flex items-center gap-2 text-sm">
-            <input name="isActive" type="checkbox" defaultChecked={editing?.isActive ?? true} />
+            <input
+              name="isActive"
+              type="checkbox"
+              defaultChecked={editing?.isActive ?? true}
+            />
             Показывать на сайте
           </label>
           {error ? <p className="admin-login__error">{error}</p> : null}

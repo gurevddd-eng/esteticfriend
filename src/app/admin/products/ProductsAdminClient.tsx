@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { deleteProduct } from "@/actions/admin";
 
 type CategoryOption = { id: string; name: string };
@@ -39,9 +39,13 @@ export function ProductsAdminClient({
   brands?: BrandOption[];
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const brandFromUrl = searchParams.get("brand");
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [brandFilter, setBrandFilter] = useState("all");
+  const [brandFilter, setBrandFilter] = useState(
+    brandFromUrl && brands.some((b) => b.id === brandFromUrl) ? brandFromUrl : "all",
+  );
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "hidden">("all");
 
   const activeCount = products.filter((p) => p.isActive).length;

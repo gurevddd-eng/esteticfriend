@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { readFileSync } from "fs";
+import { join } from "path";
 import {
   ADVANTAGES,
   BRANDS,
@@ -12,9 +14,27 @@ import {
 } from "../src/lib/content";
 import { DEFAULT_CONTACT_WIDGET } from "../src/lib/contact-widget";
 import { PRODUCT_COMPARE_AT_META } from "../src/lib/product-sort";
+import {
+  deserializeSpecs,
+  serializeSpecs,
+} from "../src/lib/product-sections";
 import { slugify } from "../src/lib/slugify";
 
 const prisma = new PrismaClient();
+
+type ImportedPage = { slug: string; title: string; content: string };
+
+function loadImportedPages(): ImportedPage[] {
+  try {
+    const raw = readFileSync(
+      join(process.cwd(), "scripts", "pages-from-site.json"),
+      "utf8",
+    );
+    return JSON.parse(raw) as ImportedPage[];
+  } catch {
+    return [];
+  }
+}
 
 async function main() {
   const email = process.env.ADMIN_EMAIL || "admin@esteticfriend.local";
@@ -27,17 +47,15 @@ async function main() {
     create: { email, passwordHash, name: "Администратор" },
   });
 
+  // Replace mock catalog with real products from САЙТ package.
+  await prisma.product.deleteMany({});
+  await prisma.category.deleteMany({});
+
   const categoryIdMap = new Map<string, string>();
 
   for (const cat of FALLBACK_CATEGORIES) {
-    const saved = await prisma.category.upsert({
-      where: { slug: cat.slug },
-      update: {
-        name: cat.name,
-        description: cat.description,
-        sortOrder: cat.sortOrder,
-      },
-      create: {
+    const saved = await prisma.category.create({
+      data: {
         slug: cat.slug,
         name: cat.name,
         description: cat.description,
@@ -48,6 +66,7 @@ async function main() {
   }
 
   const brandIdMap = new Map<string, string>();
+  const wantedBrandSlugs = new Set(BRANDS.map((name) => slugify(name)));
 
   for (const [index, name] of BRANDS.entries()) {
     const slug = slugify(name);
@@ -68,6 +87,12 @@ async function main() {
     brandIdMap.set(name.toLowerCase(), saved.id);
   }
 
+  // Hide brands that are no longer in the catalog package.
+  await prisma.brand.updateMany({
+    where: { slug: { notIn: [...wantedBrandSlugs] } },
+    data: { isActive: false },
+  });
+
   function detectBrandId(productName: string) {
     const lower = productName.toLowerCase();
     for (const name of BRANDS) {
@@ -85,27 +110,15 @@ async function main() {
     const compareAtPrice = PRODUCT_COMPARE_AT_META[product.slug] ?? null;
     const brandId = detectBrandId(product.name);
 
-    await prisma.product.upsert({
-      where: { slug: product.slug },
-      update: {
-        name: product.name,
-        shortDesc: product.shortDesc,
-        description: product.description,
-        imageUrl: product.imageUrl,
-        price: product.price,
-        compareAtPrice,
-        inStock: product.inStock,
-        isNew: product.isNew,
-        isHit: product.isHit,
-        isActive: true,
-        categoryId,
-        brandId,
-      },
-      create: {
+    await prisma.product.create({
+      data: {
         slug: product.slug,
         name: product.name,
         shortDesc: product.shortDesc,
         description: product.description,
+        specs: serializeSpecs(deserializeSpecs(product.specs || "")),
+        kit: product.kit || "",
+        advantages: product.advantages || "",
         imageUrl: product.imageUrl,
         price: product.price,
         compareAtPrice,
@@ -203,24 +216,25 @@ async function main() {
     });
   }
 
+  const importedPages = loadImportedPages();
   const pages = [
     {
       slug: "delivery",
       title: "Доставка и оплата",
       content:
-        "<p>Доставляем оборудование по всей России, в Республику Беларусь, Казахстан и Китай.</p><p>Офисы в Москве и Санкт-Петербурге — можно согласовать самовывоз.</p><p>Условия оплаты и сроки поставки уточняются менеджером.</p>",
+        "<p>Доставляем оборудование по России, Беларуси и Казахстану. Срок — от 1 до 40 дней.</p>",
     },
     {
       slug: "warranty",
       title: "Гарантия",
       content:
-        "<p>Предоставляем гарантийный и постгарантийный ремонт оборудования.</p><p>Условия гарантии зависят от конкретного аппарата и уточняются при покупке.</p>",
+        "<p>На всё оборудование действует гарантия. Срок указан в гарантийном талоне. Также предоставляем постгарантийный ремонт.</p>",
     },
     {
       slug: "training",
       title: "Обучение",
       content:
-        "<p>При покупке аппарата проводим бесплатное сертифицированное обучение аппаратным методикам.</p>",
+        "<p>При покупке оборудования проводим обучение в подарок — очно или дистанционно. Можно пройти курс и без покупки аппарата.</p>",
     },
     {
       slug: "certificates",
@@ -242,10 +256,15 @@ async function main() {
     },
   ];
 
-  for (const page of pages) {
+  const pageBySlug = new Map(pages.map((page) => [page.slug, page]));
+  for (const imported of importedPages) {
+    pageBySlug.set(imported.slug, imported);
+  }
+
+  for (const page of pageBySlug.values()) {
     await prisma.page.upsert({
       where: { slug: page.slug },
-      update: {},
+      update: { title: page.title, content: page.content },
       create: page,
     });
   }
@@ -274,6 +293,26 @@ async function main() {
     ["brandsCta", "Смотреть сертификаты"],
     ["brandsCtaHref", "/certificates"],
     ["brandsSectionEnabled", "1"],
+    ["certificatesKicker", "Документы"],
+    ["certificatesTitle", "Сертификаты"],
+    [
+      "certificatesLead",
+      "Сотрудничаем с проверенными заводами и поставляем оборудование, в качестве которого уверены. По запросу пришлём документы на интересующие аппараты.",
+    ],
+    [
+      "certificatesDocs",
+      JSON.stringify([
+        "Сертификат соответствия",
+        "Паспорт оборудования",
+        "Инструкция",
+        "Гарантийный талон",
+      ]),
+    ],
+    ["certificatesFormTitle", "Запросить документы"],
+    [
+      "certificatesFormLead",
+      "Укажите аппарат — пришлём доступные сертификаты и материалы.",
+    ],
     ["faviconUrl", "/brand/favicon.svg"],
     ["contactWidget", JSON.stringify(DEFAULT_CONTACT_WIDGET)],
   ];

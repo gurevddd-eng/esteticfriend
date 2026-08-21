@@ -4,6 +4,11 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteProduct, saveProduct, uploadProductImage } from "@/actions/admin";
+import {
+  deserializeSpecs,
+  serializeSpecs,
+  type SpecRow,
+} from "@/lib/product-sections";
 
 type Category = { id: string; name: string };
 type BrandOption = { id: string; name: string };
@@ -16,6 +21,9 @@ type Product = {
   brandId?: string | null;
   shortDesc: string;
   description: string;
+  specs?: string;
+  kit?: string;
+  advantages?: string;
   imageUrl: string | null;
   price: number | null;
   compareAtPrice: number | null;
@@ -102,6 +110,12 @@ export function ProductForm({
   const [brandId, setBrandId] = useState(product?.brandId || "");
   const [shortDesc, setShortDesc] = useState(product?.shortDesc || "");
   const [description, setDescription] = useState(product?.description || "");
+  const [specRows, setSpecRows] = useState<SpecRow[]>(() => {
+    const rows = deserializeSpecs(product?.specs || "");
+    return rows.length ? rows : [{ label: "", value: "" }];
+  });
+  const [kit, setKit] = useState(product?.kit || "");
+  const [advantages, setAdvantages] = useState(product?.advantages || "");
   const [imageUrl, setImageUrl] = useState(product?.imageUrl || "");
   const [price, setPrice] = useState(
     product?.price === null || product?.price === undefined ? "" : String(product.price),
@@ -165,6 +179,9 @@ export function ProductForm({
         brandId: brandId || null,
         shortDesc,
         description,
+        specs: serializeSpecs(specRows),
+        kit,
+        advantages,
         imageUrl: imageUrl || undefined,
         price: priceNumber,
         compareAtPrice: compareAtPriceNumber,
@@ -215,6 +232,9 @@ export function ProductForm({
     brandId,
     shortDesc,
     description,
+    specRows,
+    kit,
+    advantages,
     imageUrl,
     priceNumber,
     compareAtPriceNumber,
@@ -376,6 +396,12 @@ export function ProductForm({
                     </option>
                   ))}
                 </select>
+                <span className="mt-1 text-xs text-muted">
+                  Управляется в{" "}
+                  <Link href="/admin/brands" className="underline underline-offset-2">
+                    Админка → Бренды
+                  </Link>
+                </span>
               </label>
             </div>
 
@@ -416,7 +442,7 @@ export function ProductForm({
           <section className="admin-settings-card">
             <div className="admin-settings-card__head">
               <p className="admin-settings-card__eyebrow">Описание</p>
-              <h2 className="admin-settings-card__title">Тексты для каталога</h2>
+              <h2 className="admin-settings-card__title">Блоки на странице товара</h2>
             </div>
 
             <label className="admin-field">
@@ -434,14 +460,98 @@ export function ProductForm({
 
             <label className="admin-field">
               <span>
-                Полное описание
+                1. Описание
                 <em className="admin-product-edit__counter">{description.length}</em>
               </span>
               <textarea
                 className="input-field admin-product-edit__long"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Подробности для страницы товара: возможности, комплектация, для кого подходит"
+                placeholder="Основной текст: принцип работы, для кого подходит"
+              />
+            </label>
+
+            <div className="admin-field">
+              <span>
+                2. Технические характеристики
+                <em className="admin-product-edit__counter">
+                  {specRows.filter((row) => row.label.trim() || row.value.trim()).length}
+                </em>
+              </span>
+              <p className="admin-field-hint">
+                У каждого товара свой набор полей. Добавляйте строки «Параметр / Значение».
+              </p>
+              <div className="admin-spec-rows">
+                {specRows.map((row, index) => (
+                  <div key={`spec-${index}`} className="admin-spec-row">
+                    <input
+                      className="input-field"
+                      value={row.label}
+                      onChange={(e) => {
+                        const next = [...specRows];
+                        next[index] = { ...next[index], label: e.target.value };
+                        setSpecRows(next);
+                      }}
+                      placeholder="Параметр"
+                      aria-label={`Параметр ${index + 1}`}
+                    />
+                    <input
+                      className="input-field"
+                      value={row.value}
+                      onChange={(e) => {
+                        const next = [...specRows];
+                        next[index] = { ...next[index], value: e.target.value };
+                        setSpecRows(next);
+                      }}
+                      placeholder="Значение"
+                      aria-label={`Значение ${index + 1}`}
+                    />
+                    <button
+                      type="button"
+                      className="btn-outline admin-spec-row__remove"
+                      onClick={() => {
+                        const next = specRows.filter((_, i) => i !== index);
+                        setSpecRows(next.length ? next : [{ label: "", value: "" }]);
+                      }}
+                      aria-label={`Удалить параметр ${index + 1}`}
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="btn-outline admin-spec-rows__add"
+                onClick={() => setSpecRows([...specRows, { label: "", value: "" }])}
+              >
+                Добавить поле
+              </button>
+            </div>
+
+            <label className="admin-field">
+              <span>
+                3. Комплектация
+                <em className="admin-product-edit__counter">{kit.length}</em>
+              </span>
+              <textarea
+                className="input-field admin-product-edit__long"
+                value={kit}
+                onChange={(e) => setKit(e.target.value)}
+                placeholder={"Что входит в комплект, по строкам:\n- Аппарат\n- Манипула\n- Очки"}
+              />
+            </label>
+
+            <label className="admin-field">
+              <span>
+                4. Преимущества
+                <em className="admin-product-edit__counter">{advantages.length}</em>
+              </span>
+              <textarea
+                className="input-field admin-product-edit__long"
+                value={advantages}
+                onChange={(e) => setAdvantages(e.target.value)}
+                placeholder={"Ключевые плюсы аппарата, по строкам:\n- Комфортное охлаждение\n- Большой ресурс манипулы"}
               />
             </label>
           </section>

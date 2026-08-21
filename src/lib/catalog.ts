@@ -99,6 +99,56 @@ export type HeroSlideDTO = {
   sortOrder: number;
 };
 
+export type CertificateDTO = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  sortOrder: number;
+};
+
+export type CertificatesPageConfig = {
+  kicker: string;
+  title: string;
+  lead: string;
+  docs: string[];
+  formTitle: string;
+  formLead: string;
+};
+
+const DEFAULT_CERTIFICATES_PAGE: CertificatesPageConfig = {
+  kicker: "Документы",
+  title: "Сертификаты",
+  lead:
+    "Сотрудничаем с проверенными заводами и поставляем оборудование, в качестве которого уверены. По запросу пришлём документы на интересующие аппараты.",
+  docs: [
+    "Сертификат соответствия",
+    "Паспорт оборудования",
+    "Инструкция",
+    "Гарантийный талон",
+  ],
+  formTitle: "Запросить документы",
+  formLead: "Укажите аппарат — пришлём доступные сертификаты и материалы.",
+};
+
+function parseDocsList(raw: string | undefined, fallback: string[]): string[] {
+  if (!raw?.trim()) return fallback;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed)) {
+      const list = parsed.map((item) => String(item || "").trim()).filter(Boolean);
+      return list.length ? list : fallback;
+    }
+  } catch {
+    // plain text, one item per line
+  }
+  const lines = raw
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^[-•*\d.)\s]+/, "").trim())
+    .filter(Boolean);
+  return lines.length ? lines : fallback;
+}
+
 function phoneToHref(phone: string) {
   const digits = phone.replace(/[^\d+]/g, "");
   return digits ? `tel:${digits}` : SITE.phoneHref;
@@ -161,6 +211,9 @@ function mapProduct(
     name: string;
     shortDesc: string;
     description: string;
+    specs?: string | null;
+    kit?: string | null;
+    advantages?: string | null;
     imageUrl: string | null;
     price?: unknown;
     compareAtPrice?: unknown;
@@ -184,6 +237,9 @@ function mapProduct(
     name: p.name,
     shortDesc: p.shortDesc,
     description: p.description,
+    specs: p.specs ?? "",
+    kit: p.kit ?? "",
+    advantages: p.advantages ?? "",
     imageUrl: p.imageUrl
       ? p.imageUrl.replace(/\.(png|jpe?g)$/i, ".webp")
       : p.imageUrl,
@@ -781,6 +837,40 @@ export async function getHeroSlides(): Promise<HeroSlideDTO[]> {
     tone: r.tone,
     sortOrder: r.sortOrder,
   }));
+}
+
+export async function getCertificatesPageConfig(): Promise<CertificatesPageConfig> {
+  if (!(await dbAvailable())) {
+    return DEFAULT_CERTIFICATES_PAGE;
+  }
+  const settings = await getSettings();
+  return {
+    kicker: settings.certificatesKicker || DEFAULT_CERTIFICATES_PAGE.kicker,
+    title: settings.certificatesTitle || DEFAULT_CERTIFICATES_PAGE.title,
+    lead: settings.certificatesLead || DEFAULT_CERTIFICATES_PAGE.lead,
+    docs: parseDocsList(settings.certificatesDocs, DEFAULT_CERTIFICATES_PAGE.docs),
+    formTitle: settings.certificatesFormTitle || DEFAULT_CERTIFICATES_PAGE.formTitle,
+    formLead: settings.certificatesFormLead || DEFAULT_CERTIFICATES_PAGE.formLead,
+  };
+}
+
+export async function getCertificates(): Promise<CertificateDTO[]> {
+  if (!(await dbAvailable())) return [];
+
+  const rows = await prisma.certificate.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: "asc" },
+  });
+
+  return rows
+    .filter((r) => Boolean(r.imageUrl?.trim()))
+    .map((r) => ({
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      imageUrl: r.imageUrl,
+      sortOrder: r.sortOrder,
+    }));
 }
 
 export async function createLead(input: {

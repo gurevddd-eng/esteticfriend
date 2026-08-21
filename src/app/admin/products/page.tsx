@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { ProductsAdminClient } from "./ProductsAdminClient";
 
@@ -32,13 +33,15 @@ export default async function AdminProductsPage() {
   ]);
 
   return (
-    <ProductsAdminClient
-      products={products.map((p) => ({
-        ...p,
-        price: p.price === null ? null : Number(p.price),
-      }))}
-      categories={categories}
-      brands={brands}
-    />
+    <Suspense fallback={<p className="text-muted">Загрузка товаров...</p>}>
+      <ProductsAdminClient
+        products={products.map((p) => ({
+          ...p,
+          price: p.price === null ? null : Number(p.price),
+        }))}
+        categories={categories}
+        brands={brands}
+      />
+    </Suspense>
   );
 }

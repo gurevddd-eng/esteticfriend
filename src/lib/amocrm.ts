@@ -142,6 +142,7 @@ function sourceLabel(source?: string | null) {
     warranty: "Гарантия",
     training: "Обучение",
     certificates: "Сертификаты",
+    brands: "Бренды",
     site: "Сайт",
   };
   if (!source) return "Сайт";

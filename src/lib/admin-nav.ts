@@ -42,7 +42,10 @@ export const ADMIN_SECTIONS: AdminNavSection[] = [
   {
     id: "materials",
     label: "Материалы",
-    items: [{ href: "/admin/pages", label: "Страницы" }],
+    items: [
+      { href: "/admin/pages", label: "Страницы" },
+      { href: "/admin/certificates", label: "Сертификаты" },
+    ],
   },
   {
     id: "system",

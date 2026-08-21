@@ -24,9 +24,12 @@ export function ProductCard({ product }: { product: ProductDTO }) {
         ) : (
           <span className="device-silhouette" />
         )}
-        <div className="absolute top-3 left-3 z-10 flex flex-wrap gap-2">
+        <div className="product-tile__badges">
           {product.isNew ? <span className="badge badge-new">Новинка</span> : null}
           {product.isHit ? <span className="badge badge-hit">Хит</span> : null}
+          {!product.inStock ? (
+            <span className="badge badge-order">Под заказ</span>
+          ) : null}
         </div>
         <ProductListActions
           product={product}

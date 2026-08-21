@@ -46,10 +46,8 @@ export function CallbackModal({
         <button type="button" className="modal-close" onClick={onClose} aria-label="Закрыть">
           ×
         </button>
-        <h2 className="font-[family-name:var(--font-syne)] text-xl font-bold text-navy">
-          {title}
-        </h2>
-        <p className="mt-2 mb-5 text-sm text-muted">{description}</p>
+        <h2 className="page-form__title">{title}</h2>
+        <p className="page-form__lead">{description}</p>
         <LeadForm source={source} compact={compact} onSuccess={onClose} />
       </div>
     </div>

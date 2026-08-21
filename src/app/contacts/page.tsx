@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LeadForm } from "@/components/LeadForm";
 import { PageFormPanel } from "@/components/PageFormPanel";
 import { getSiteInfo } from "@/lib/catalog";
+import { DELIVERY_GEO } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Контакты",
@@ -39,7 +40,7 @@ export default async function ContactsPage() {
             </li>
             <li>
               <span className="contact-facts__label">Доставка</span>
-              <span className="contact-facts__value">Россия, СНГ, Китай</span>
+              <span className="contact-facts__value">{DELIVERY_GEO}</span>
             </li>
           </ul>
         </div>

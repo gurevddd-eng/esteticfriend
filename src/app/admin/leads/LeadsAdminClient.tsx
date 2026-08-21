@@ -32,6 +32,7 @@ const SOURCE_LABELS: Record<string, string> = {
   certificates: "Сертификаты",
   training: "Обучение",
   warranty: "Гарантия",
+  brands: "Бренды",
   delivery: "Доставка",
 };
 

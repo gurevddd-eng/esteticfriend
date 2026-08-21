@@ -4,9 +4,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { BuyOneClick } from "@/components/BuyOneClick";
+import { ProductDetailsTabs } from "@/components/ProductDetailsTabs";
 import { ProductListActions } from "@/components/ProductListActions";
 import { formatPrice } from "@/lib/format";
 import { getProductBySlug } from "@/lib/catalog";
+import { splitProductSections, deserializeSpecs, serializeSpecs } from "@/lib/product-sections";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -26,6 +28,20 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   const priceLabel = formatPrice(product.price);
+  const hasStructured = Boolean(
+    product.specs?.trim() || product.kit?.trim() || product.advantages?.trim(),
+  );
+  const legacy = hasStructured ? null : splitProductSections(product.description);
+  const specsRaw = product.specs || legacy?.specs || "";
+  const sections = {
+    description: hasStructured
+      ? product.description
+      : legacy?.description || product.description,
+    // Only real parameter/value pairs for this product.
+    specs: serializeSpecs(deserializeSpecs(specsRaw)),
+    kit: product.kit || legacy?.kit || "",
+    advantages: product.advantages || legacy?.advantages || "",
+  };
 
   return (
     <div className="page">
@@ -67,7 +83,7 @@ export default async function ProductPage({ params }: Props) {
           />
         </div>
 
-        <div>
+        <div className="product-page__summary">
           <div className="product-page__meta">
             {product.brand ? (
               <Link href={`/brands/${product.brand.slug}`} className="product-page__category">
@@ -90,7 +106,7 @@ export default async function ProductPage({ params }: Props) {
             {product.inStock ? (
               <span className="badge badge-stock">В наличии</span>
             ) : (
-              <span className="badge badge-hit">Под заказ</span>
+              <span className="badge badge-order">Под заказ</span>
             )}
           </div>
 
@@ -111,13 +127,10 @@ export default async function ProductPage({ params }: Props) {
               Перейти в корзину
             </Link>
           </div>
-
-          <div className="product-page__desc">
-            <h2>Описание</h2>
-            <p>{product.description}</p>
-          </div>
         </div>
       </div>
+
+      <ProductDetailsTabs sections={sections} />
     </div>
   );
 }

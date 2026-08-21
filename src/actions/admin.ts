@@ -67,6 +67,9 @@ export async function saveProduct(
     brandId?: string | null;
     shortDesc?: string;
     description?: string;
+    specs?: string;
+    kit?: string;
+    advantages?: string;
     imageUrl?: string;
     price?: number | null;
     compareAtPrice?: number | null;
@@ -97,6 +100,9 @@ export async function saveProduct(
     brandId: input.brandId?.trim() ? input.brandId.trim() : null,
     shortDesc: input.shortDesc?.trim() || "",
     description: input.description?.trim() || "",
+    specs: input.specs?.trim() || "",
+    kit: input.kit?.trim() || "",
+    advantages: input.advantages?.trim() || "",
     imageUrl: input.imageUrl?.trim() || null,
     price,
     compareAtPrice,
@@ -110,6 +116,7 @@ export async function saveProduct(
     await prisma.product.update({ where: { id }, data });
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/${id}`);
+    revalidatePath(`/product/${slug}`);
     revalidatePath("/catalog");
     revalidatePath("/brands");
     revalidatePath("/");
@@ -119,6 +126,7 @@ export async function saveProduct(
   const created = await prisma.product.create({ data });
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${created.id}`);
+  revalidatePath(`/product/${created.slug}`);
   revalidatePath("/catalog");
   revalidatePath("/brands");
   revalidatePath("/");
@@ -513,6 +521,81 @@ export async function deleteHeroSlide(id: string) {
   await prisma.heroSlide.delete({ where: { id } });
   revalidatePath("/");
   revalidatePath("/admin/slides");
+  return { ok: true as const };
+}
+
+export async function saveCertificate(
+  input: {
+    title: string;
+    description?: string;
+    imageUrl?: string;
+    sortOrder?: number;
+    isActive?: boolean;
+  },
+  id?: string,
+) {
+  await assertAdmin();
+  const data = {
+    title: input.title.trim(),
+    description: input.description?.trim() || "",
+    imageUrl: input.imageUrl?.trim() || "",
+    sortOrder: input.sortOrder ?? 0,
+    isActive: input.isActive ?? true,
+  };
+  if (!data.imageUrl) {
+    return { ok: false as const, error: "Загрузите фото сертификата" };
+  }
+  if (id) {
+    await prisma.certificate.update({ where: { id }, data });
+  } else {
+    await prisma.certificate.create({ data });
+  }
+  revalidatePath("/certificates");
+  revalidatePath("/admin/certificates");
+  return { ok: true as const };
+}
+
+export async function deleteCertificate(id: string) {
+  await assertAdmin();
+  await prisma.certificate.delete({ where: { id } });
+  revalidatePath("/certificates");
+  revalidatePath("/admin/certificates");
+  return { ok: true as const };
+}
+
+export async function saveCertificatesPageContent(input: {
+  kicker: string;
+  title: string;
+  lead: string;
+  docs: string;
+  formTitle: string;
+  formLead: string;
+}) {
+  await assertAdmin();
+  const docs = input.docs
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^[-•*\d.)\s]+/, "").trim())
+    .filter(Boolean);
+
+  const pairs: Array<[string, string]> = [
+    ["certificatesKicker", input.kicker.trim()],
+    ["certificatesTitle", input.title.trim()],
+    ["certificatesLead", input.lead.trim()],
+    ["certificatesDocs", JSON.stringify(docs)],
+    ["certificatesFormTitle", input.formTitle.trim()],
+    ["certificatesFormLead", input.formLead.trim()],
+  ];
+
+  for (const [key, value] of pairs) {
+    await prisma.siteSetting.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value },
+    });
+  }
+
+  revalidatePath("/certificates");
+  revalidatePath("/admin/certificates");
   return { ok: true as const };
 }
 

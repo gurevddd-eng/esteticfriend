@@ -26,17 +26,7 @@ export type ProductSortMeta = {
 export type CatalogProduct = ProductDTO & ProductSortMeta;
 
 /** Fallback compare-at prices for static catalog data keyed by product slug. */
-export const PRODUCT_COMPARE_AT_META: Record<string, number> = {
-  "rf-explore": 520_000,
-  "anchorfree-v8c2": 510_000,
-  "mbt-340": 420_000,
-  "oxygen-aqua-jet-peel": 228_000,
-  soprano: 680_000,
-  omegy: 470_000,
-  "kls-116": 360_000,
-  "7d-hifu": 620_000,
-  h8: 290_000,
-};
+export const PRODUCT_COMPARE_AT_META: Record<string, number> = {};
 
 export function enrichProductForSort(
   product: ProductDTO,

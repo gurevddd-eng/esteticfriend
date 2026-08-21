@@ -42,7 +42,7 @@ export default async function HomePage() {
       <PromoBanners promos={promos} />
       <CatalogCta />
 
-      <section className="section-pad hits-section">
+      <section className="hits-section">
         <HitsSlider products={hits} />
       </section>
 
